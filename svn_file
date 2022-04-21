@@ -1,0 +1,2238 @@
+Index: web/card/src/main/resources
+===================================================================
+--- web/card/src/main/resources	(revision 8661)
++++ web/card/src/main/resources	(revision 8749)
+
+Property changes on: web/card/src/main/resources
+___________________________________________________________________
+Modified: svn:mergeinfo
+   Merged /branches/DEV/02_Codes/shr-parent/web/card/src/main/resources:r8169-8200,8628-8636
+Index: web/hbweixin/WebRoot/vue-src/src/pages/privateroomorder/privateroomOrderDetail.vue
+===================================================================
+--- web/hbweixin/WebRoot/vue-src/src/pages/privateroomorder/privateroomOrderDetail.vue	(revision 8661)
++++ web/hbweixin/WebRoot/vue-src/src/pages/privateroomorder/privateroomOrderDetail.vue	(revision 8749)
+@@ -92,9 +92,9 @@
+           </div>
+         </div>
+       </div>
+-      <privateroomMorenav @gotoAdd="gotoAdd" @gotoPay="gotoPay" :orderStatus="orderDetailObj.orderStatus"
++    </div>
++    <privateroomMorenav :orderStatus="orderDetailObj.orderStatus" @gotoAdd="gotoAdd" @gotoPay="gotoPay"
+                           v-if="orderDetailObj.orderStatus === 2 || orderDetailObj.orderStatus === 10"></privateroomMorenav>
+-    </div>
+     <div class="noRecordDataDetail" v-else>
+       <img src="../../assets/images/privateroom/noSearchData.png" alt="">
+       <p>暂无订单～</p>
+Index: web/hbweixin/WebRoot/vue-src/src/assets/style/page/privateroomorder.less
+===================================================================
+--- web/hbweixin/WebRoot/vue-src/src/assets/style/page/privateroomorder.less	(revision 8661)
++++ web/hbweixin/WebRoot/vue-src/src/assets/style/page/privateroomorder.less	(revision 8749)
+@@ -1346,6 +1346,8 @@
+   width: 100%;
+   height: 112/@px;
+   display: flex;
++  position: fixed;
++  bottom: 0;
+   background-color: #ffffff;
+   box-sizing: border-box;
+   border-top: 1/@px solid rgba(0, 0, 0, 0.1);
+@@ -2660,7 +2662,7 @@
+     width: 100%;
+     display: flex;
+     flex-direction: column;
+-    position: relative;
++    position: absolute;
+     overflow-y: auto;
+     padding-bottom: 112/@px;
+ 
+@@ -2954,7 +2956,7 @@
+       }
+     }
+     .privateroomMorenav {
+-      z-index: 200;
++      //z-index: 200;
+       position: fixed;
+       bottom: 0;
+     }
+Index: web/cas/src/main/java/com/xk/msa/ca/shiro/ctrl/LoginController.java
+===================================================================
+--- web/cas/src/main/java/com/xk/msa/ca/shiro/ctrl/LoginController.java	(revision 8661)
++++ web/cas/src/main/java/com/xk/msa/ca/shiro/ctrl/LoginController.java	(revision 8749)
+@@ -1219,7 +1219,7 @@
+ 
+ 
+ 	/**
+-	 * 成功个性化
++	 * 成都个性化
+ 	 * @param simpleLogin
+ 	 * @param request
+ 	 * @return
+Index: web/cas/src/main/resources/application.yml
+===================================================================
+--- web/cas/src/main/resources/application.yml	(revision 8661)
++++ web/cas/src/main/resources/application.yml	(revision 8749)
+@@ -2,8 +2,8 @@
+   gateway.server: 127.0.0.1:18080
+   security.jwt:
+     tokenHeader: XK-Autho1.0.0
+-    tokenExpirationTime: 60
+-    refreshTokenExpTime: 120
++    tokenExpirationTime: 720
++    refreshTokenExpTime: 720
+     tokenObtainMaxNumber: 10000
+     tokenIssuer: http://360ser.com
+     tokenSigningKey: xkhasanxm8EV6Hy5RMFK4EEACIDAwQus
+Index: web/cas
+===================================================================
+--- web/cas	(revision 8661)
++++ web/cas	(revision 8749)
+
+Property changes on: web/cas
+___________________________________________________________________
+Modified: svn:mergeinfo
+   Merged /branches/DEV/02_Codes/shr-parent/web/cas:r8063-8077,8151-8161
+Index: web
+===================================================================
+--- web	(revision 8661)
++++ web	(revision 8749)
+
+Property changes on: web
+___________________________________________________________________
+Modified: svn:mergeinfo
+   Merged /branches/DEV/02_Codes/shr-parent/web:r8063-8077,8151-8161,8169-8200,8207-8237,8258-8278,8281-8284,8289-8310,8314,8325-8328,8331-8373,8408-8425,8435-8456,8472-8481,8486-8502,8531-8534,8541-8542,8548-8565,8572-8577,8579-8583,8628-8636
+Index: client/portal.ui
+===================================================================
+--- client/portal.ui	(revision 8661)
++++ client/portal.ui	(revision 8749)
+
+Property changes on: client/portal.ui
+___________________________________________________________________
+Modified: svn:mergeinfo
+   Merged /branches/DEV/02_Codes/shr-parent/client/portal.ui:r8063-8077
+Index: client/manager.ui/src/js/126/business.js
+===================================================================
+--- client/manager.ui/src/js/126/business.js	(revision 8661)
++++ client/manager.ui/src/js/126/business.js	(revision 8749)
+@@ -5831,3 +5831,44 @@
+     });
+     return html;
+ }
++
++/*
++* 评级考核
++* */
++function setsuppliergradeEvaluate (obj) {
++    var content = $(obj).parents('.modal-content');
++    var grade = content.find('.checked').length;
++    var remark = $(content).find('textarea[name="remark"]').val();
++    var dataval = getdatacapsule('suppliergradeassesshome', 'dataId')[0];
++    var ajaxObj = {
++        supplierId: dataval.id,
++        supplierAssessId: dataval.supplierAssessId,
++        grade: grade,
++        remark: remark
++    };
++    requestJson('/109/supplier/assess/u.do?t=' + Math.random(), ajaxObj, 'm109', function (msg) {
++        var code = (msg.code).substring(3);
++        if (code < 20000) {
++            removeceng($('.modal-content'));
++            traversequery('suppliergradeassesshome');
++            xkprompt('评价成功！');
++        } else {
++            xkprompt(msg.result || '');
++        }
++    });
++}
++
++function getgradestar (item) {
++    var grade = item.value
++    var html = '';
++    html += '<div class="width140">';
++    for (var i = 0 ; i < 5 ; i ++) {
++        if (i >= 0 && i <= grade - 1){
++            html += '<img style="width: 18px" src="../../../images/starsy.png" />';
++        } else {
++            html += '<img style="width: 18px" src="../../../images/starky.png" />';
++        }
++    }
++    html += '</div>';
++    return html;
++}
+Index: client/manager.ui/src/js/109/business.js
+===================================================================
+--- client/manager.ui/src/js/109/business.js	(revision 8661)
++++ client/manager.ui/src/js/109/business.js	(revision 8749)
+@@ -959,7 +959,9 @@
+         return;
+     }
+     if (!tps || tps === '') tps = 'l';
++    var $loading = xkloading();
+     requestJson(ajaxurl + tps + '.do?t=' + Math.random(), ajaxObj, ajaxcode, function (msg) {
++        $loading.remove();
+         var code = (msg.code).substring(3);
+         var childobj = $('table[data-type=' + types + ']').parents('div[data-toggle].on').length > 0 ? $('table[data-type=' + types + ']').parents('div[data-toggle].on') : $('table[data-type=' + types + ']').parents('.modal-content');
+         childobj.find('.btn-disabled').removeClass('btn-disabled');
+Index: client/manager.ui/src/js/datalist.js
+===================================================================
+--- client/manager.ui/src/js/datalist.js	(revision 8661)
++++ client/manager.ui/src/js/datalist.js	(revision 8749)
+@@ -420,6 +420,7 @@
+         case 'invoicemanagementadd':
+         case 'invoicemanagementpopup':
+         case 'stocktakingofmonthhome':
++        case 'suppliergradeassesshome':
+         case 'payablecount':
+         case 'notpaycounthome':
+         case 'samecount':
+@@ -965,6 +966,7 @@
+     invoicemanagementedit: '/126/receipt/',
+     invoicemanagementadd: '/126/receipt/',
+     stocktakingofmonthhome: '/126/stock/count/report/taking/month/',
++    suppliergradeassesshome: '/109/supplier/assess/',
+     payablecount: '/126/stock/count/payable/',
+     notpaycounthome: '/126/stock/count/notpay/',
+     samecount: '/126/stock/count/same/',
+Index: client/manager.ui/src/js/public.js
+===================================================================
+--- client/manager.ui/src/js/public.js	(revision 8661)
++++ client/manager.ui/src/js/public.js	(revision 8749)
+@@ -72,11 +72,19 @@
+                         $($curpanel.find('iframe')[0].contentWindow.document.body).html(res);
+                         loadcontent($tabpanel, 2);
+                     } else {
++                        if (res.indexOf('<div>')) {
++                            var ret = JSON.parse(res.split('<')[0]);
++                            var code = (ret.code).substring(3);
++                            if (code == '10220002' || code == '40004') {
++                                showlogoutdialog();
++                            }
++                        } else {
+                         var ret = JSON.parse(res) || res;
+                         var code = (ret.code).substring(3);
+                         if (code == '10220002' || code == '40004') {
+                             showlogoutdialog();
+                         }
++                        }
+                         cb(ret);
+                     }
+                 } else {
+
+Property changes on: client/manager.ui/src/js/public.js
+___________________________________________________________________
+Modified: svn:mergeinfo
+   Merged /branches/DEV/02_Codes/shr-parent/client/manager.ui/src/js/public.js:r8645,8702-8706
+Index: client/manager.ui/views/126/tenant/stockcheck
+===================================================================
+--- client/manager.ui/views/126/tenant/stockcheck	(revision 8661)
++++ client/manager.ui/views/126/tenant/stockcheck	(revision 8749)
+
+Property changes on: client/manager.ui/views/126/tenant/stockcheck
+___________________________________________________________________
+Modified: svn:mergeinfo
+   Merged /branches/DEV/02_Codes/shr-parent/client/manager.ui/views/126/tenant/stockcheck:r8331-8373
+Index: client/manager.ui/views/126/tenant/suppliergradeassess/home.ejs
+===================================================================
+--- client/manager.ui/views/126/tenant/suppliergradeassess/home.ejs	(revision 0)
++++ client/manager.ui/views/126/tenant/suppliergradeassess/home.ejs	(revision 8749)
+@@ -0,0 +1,36 @@
++<div class="search-box clearfix">
++    <div class="search-box-cent">
++        <div class="search-item fr">
++            <span class="btn btn-default query_list" html-type="<%=htmltype%>">过滤</span>
++            <span class="btn btn-default query_reset">重置</span>
++        </div>
++        <div class="search-item mr20">
++            <label>名称：</label>
++            <input class="main-input width200" name="supplierName"  placeholder="供应商名称"/>
++        </div>
++    </div>
++</div>
++<div class="btn-box" html-type="<%=htmltype%>">
++    <% if(authorityid.evaluate){ %>
++    <span class="btn table-opt-btn btn-default data_view" data-optobj="<%=htmltype%>" data-show="popup" data-width="550" data-title="供应商等级评价" data-name="suppliergradeEvaluate"
++          data-fun="setsuppliergradeEvaluate" data-url="126/suppliergradeassess/evaluatepopup.ejs">评价</span>
++    <% } %>
++    <% if(authorityid.export){ %>
++    <span class="btn table-opt-btn btn-default" onclick="exportfile('<%=htmltype%>')" title="导出">导出</span>
++    <% } %>
++</div>
++<div class="table-box">
++    <table class="table table-bordered table-line table-check" data-type="<%=htmltype%>" data-name="供应商档案">
++        <tr>
++            <th data-field="supplierId" data-types="checkbox" data-checkbox="supplierId, supplierName, supplierAssessId, grade, remark"><span class="inputcheck"><input type="checkbox" choose-type="ckball"/></span></th>
++            <th data-field="supplierName" class="width300" data-length="40">供应商名称</th>
++            <th data-field="grade" data-fun="getgradestar">评价等级</th>
++            <th data-field="remark">备注</th>
++            <th></th>
++        </tr>
++    </table>
++</div>
++<%- include('../../../pager',{pageNumber:15,htmltype:htmltype}) %>
++<script>
++    traversequery('<%=htmltype%>');
++</script>
+Index: client/manager.ui/views/126/tenant/suppliergradeassess/evaluatepopup.ejs
+===================================================================
+--- client/manager.ui/views/126/tenant/suppliergradeassess/evaluatepopup.ejs	(revision 0)
++++ client/manager.ui/views/126/tenant/suppliergradeassess/evaluatepopup.ejs	(revision 8749)
+@@ -0,0 +1,71 @@
++<div class="entrycontent clearfix" html-type="<%= htmltype %>">
++    <div class="zyxk-form mt12" html-type="<%= htmltype %>">
++        <div class="control-group">
++            <label class="control-label">供应商名称：</label>
++            <div class="controls">
++                <span name="supplierName" class="spaninput" style="line-height: 2; background-color: white;"></span>
++            </div>
++        </div>
++        <div class="control-group">
++            <label class="control-label">评价等级：</label>
++            <div class="controls">
++                <div class="stars" name="grade">
++                    <div class="star"></div>
++                    <div class="star"></div>
++                    <div class="star"></div>
++                    <div class="star"></div>
++                    <div class="star"></div>
++                </div>
++            </div>
++        </div>
++        <div class="control-group">
++            <label class="control-label">备注：</label>
++            <div class="controls">
++                <textarea class="main-input textarea" style="width: 350px;" name="remark" datatype="empty|*" numwords="200" placeholder="审批意见"></textarea>
++            </div>
++        </div>
++    </div>
++</div>
++
++<style>
++    .stars {
++        display: flex;
++        flex-direction: row;
++    }
++    .star {
++        width: 25px;
++        height: 25px;
++        background: url("../../../images/starky.png") no-repeat;
++    }
++</style>
++
++<script>
++    var dataval = getdatacapsule('suppliergradeassesshome', 'dataId')[0];
++    $('span[name="supplierName"]').text(dataval.supplierName)
++    $('textarea[name="remark"]').text(dataval.remark || '')
++    var grade = dataval.grade || 0
++    $.each($('.stars .star'), function (i, item) {
++        if (i >= 0 && i <= grade - 1){
++            $(item).addClass('checked')
++            $(item).css('background', 'url("../../../images/starsy.png") no-repeat')
++        } else {
++            $(item).removeClass('checked')
++            $(item).css('background', 'url("../../../images/starky.png") no-repeat')
++        }
++    })
++
++    $(function () {
++        $('body').on('click', '.star', function () {
++            var index = $('.stars .star').index(this)
++            $.each($('.stars .star'), function (i, item) {
++                if (i >= 0 && i <= index){
++                    $(item).addClass('checked')
++                    $(item).css('background', 'url("../../../images/starsy.png") no-repeat')
++                } else {
++                    $(item).removeClass('checked')
++                    $(item).css('background', 'url("../../../images/starky.png") no-repeat')
++                }
++            })
++        })
++    })
++</script>
+Index: client/manager.ui/views/126/tenant/statistics/outstockreporthome.ejs
+===================================================================
+--- client/manager.ui/views/126/tenant/statistics/outstockreporthome.ejs	(revision 8661)
++++ client/manager.ui/views/126/tenant/statistics/outstockreporthome.ejs	(revision 8749)
+@@ -24,6 +24,7 @@
+                 <option title="盘亏出库" value="5">盘亏出库</option>
+                 <option title="冲正出库" value="6">冲正出库</option>
+                 <option title="拆卸出库" value="7">拆卸出库</option>
++                <option title="组装出库" value="8">组装出库</option>
+             </select>
+         </div>
+     </div>
+Index: client/manager.ui/views/126/tenant/statistics
+===================================================================
+--- client/manager.ui/views/126/tenant/statistics	(revision 8661)
++++ client/manager.ui/views/126/tenant/statistics	(revision 8749)
+
+Property changes on: client/manager.ui/views/126/tenant/statistics
+___________________________________________________________________
+Modified: svn:mergeinfo
+   Merged /branches/DEV/02_Codes/shr-parent/client/manager.ui/views/126/tenant/statistics:r8331-8373
+Index: client/manager.ui/routes/126.js
+===================================================================
+--- client/manager.ui/routes/126.js	(revision 8661)
++++ client/manager.ui/routes/126.js	(revision 8749)
+@@ -839,9 +839,19 @@
+ router.get('/statistics/notpaycount', (req, res, next) => {
+     res.render(`${tenantpath}/statistics/notpaycounthome`, { htmltype: 'notpaycounthome' });
+ });
++/**
++ * 供应商评级账表
++ */
++router.get('/suppliergradeassess/suppliergradeassesshome', (req, res, next) => {
++    res.render(`${tenantpath}/suppliergradeassess/home`, { htmltype: 'suppliergradeassesshome' });
++});
++router.get('/suppliergradeassess/evaluatepopup', (req, res, next) => {
++    res.render(`${tenantpath}/suppliergradeassess/evaluatepopup`, {
++        htmltype: 'suppliergradeEvaluate'
++    });
++});
+ 
+ 
+-
+ /**
+  * 现存量
+  */
+Index: client
+===================================================================
+--- client	(revision 8661)
++++ client	(revision 8749)
+
+Property changes on: client
+___________________________________________________________________
+Modified: svn:mergeinfo
+   Merged /branches/DEV/02_Codes/shr-parent/client:r8039,8063-8077,8114-8124,8131-8138,8151-8161,8169-8200,8202-8203,8207-8237,8289-8310,8331-8373,8396-8402,8409-8425,8435-8457,8531-8534,8548-8565,8567,8579-8583,8645,8656-8661
+Index: biz/restaurant/com.zyxk.sl.ctcomponent/src/main/resources
+===================================================================
+--- biz/restaurant/com.zyxk.sl.ctcomponent/src/main/resources	(revision 8661)
++++ biz/restaurant/com.zyxk.sl.ctcomponent/src/main/resources	(revision 8749)
+
+Property changes on: biz/restaurant/com.zyxk.sl.ctcomponent/src/main/resources
+___________________________________________________________________
+Modified: svn:mergeinfo
+   Merged /branches/DEV/02_Codes/shr-parent/biz/restaurant/com.zyxk.sl.ctcomponent/src/main/resources:r8166,8486-8502
+Index: biz/restaurant/com.zyxk.sl.ctcomponent/src/main/java/com/zyxk/sl/ctcomponent/cache/PrivateRoomTableStatusCache.java
+===================================================================
+--- biz/restaurant/com.zyxk.sl.ctcomponent/src/main/java/com/zyxk/sl/ctcomponent/cache/PrivateRoomTableStatusCache.java	(revision 8661)
++++ biz/restaurant/com.zyxk.sl.ctcomponent/src/main/java/com/zyxk/sl/ctcomponent/cache/PrivateRoomTableStatusCache.java	(revision 8749)
+@@ -13,6 +13,7 @@
+ 
+ import java.util.List;
+ import java.util.Map;
++import java.util.concurrent.TimeUnit;
+ 
+ /**
+  * 餐桌状态及订单缓存
+@@ -75,6 +76,7 @@
+             }
+ 
+         }
++        map.expire(10, TimeUnit.MINUTES);
+         return map;
+     }
+ 
+Index: biz/restaurant/com.zyxk.sl.ctcomponent/src/main/java/com/zyxk/sl/ctcomponent/cache/expired/bxdcservice/PrivateRoomTableStatusCacheExpired.java
+===================================================================
+--- biz/restaurant/com.zyxk.sl.ctcomponent/src/main/java/com/zyxk/sl/ctcomponent/cache/expired/bxdcservice/PrivateRoomTableStatusCacheExpired.java	(revision 8661)
++++ biz/restaurant/com.zyxk.sl.ctcomponent/src/main/java/com/zyxk/sl/ctcomponent/cache/expired/bxdcservice/PrivateRoomTableStatusCacheExpired.java	(revision 8749)
+@@ -2,6 +2,7 @@
+ 
+ import com.zyxk.sl.ctcomponent.cache.PrivateRoomAreaCache;
+ import com.zyxk.sl.ctcomponent.cache.PrivateRoomTableStatusCache;
++import org.apache.commons.lang3.StringUtils;
+ import org.slf4j.Logger;
+ import org.slf4j.LoggerFactory;
+ import org.springframework.beans.factory.annotation.Autowired;
+@@ -28,9 +29,13 @@
+      * @param id 区域id
+      */
+     public void notify(String servicePrefix,String orgId,String id){
+-        logger.info("餐桌状态通知清除缓存 orgId={} id={}",orgId,id);
+-        privateRoomTableStatusCache.clearCache(servicePrefix,orgId,id);
++        if(StringUtils.isNotBlank(orgId) && StringUtils.isNotBlank(id)) {
++            logger.info("1:餐桌状态通知清除缓存 orgId={} id={}", orgId, id);
++            privateRoomTableStatusCache.clearCache(servicePrefix, orgId, id);
++        }else {
++            logger.warn("2餐桌状态通知清除缓存失败！ orgId={} id={}", orgId, id);
+     }
++    }
+ 
+     /**
+      *
+Index: biz/restaurant/com.zyxk.sl.ctcomponent/src/main/java/com/zyxk/sl/ctcomponent/cache/expired
+===================================================================
+--- biz/restaurant/com.zyxk.sl.ctcomponent/src/main/java/com/zyxk/sl/ctcomponent/cache/expired	(revision 8661)
++++ biz/restaurant/com.zyxk.sl.ctcomponent/src/main/java/com/zyxk/sl/ctcomponent/cache/expired	(revision 8749)
+
+Property changes on: biz/restaurant/com.zyxk.sl.ctcomponent/src/main/java/com/zyxk/sl/ctcomponent/cache/expired
+___________________________________________________________________
+Modified: svn:mergeinfo
+   Merged /branches/DEV/02_Codes/shr-parent/biz/restaurant/com.zyxk.sl.ctcomponent/src/main/java/com/zyxk/sl/ctcomponent/cache/expired:r8656-8661
+Index: biz/restaurant/com.zyxk.sl.ctcomponent/src/main/java/com/zyxk/sl/ctcomponent/httpclient/dto/TogetherPayMainScanCondition.java
+===================================================================
+--- biz/restaurant/com.zyxk.sl.ctcomponent/src/main/java/com/zyxk/sl/ctcomponent/httpclient/dto/TogetherPayMainScanCondition.java	(revision 8661)
++++ biz/restaurant/com.zyxk.sl.ctcomponent/src/main/java/com/zyxk/sl/ctcomponent/httpclient/dto/TogetherPayMainScanCondition.java	(revision 8749)
+@@ -39,6 +39,16 @@
+ 
+     private Integer requestSource;
+ 
++    private String areaId;
++
++    public String getAreaId() {
++        return areaId;
++    }
++
++    public void setAreaId(String areaId) {
++        this.areaId = areaId;
++    }
++
+     public Integer getCombination() {
+         return combination;
+     }
+Index: biz/restaurant/com.zyxk.sl.ctcomponent/src/main/java/com/zyxk/sl/ctcomponent/dto/DtoSaleOrderAsyn.java
+===================================================================
+--- biz/restaurant/com.zyxk.sl.ctcomponent/src/main/java/com/zyxk/sl/ctcomponent/dto/DtoSaleOrderAsyn.java	(revision 8661)
++++ biz/restaurant/com.zyxk.sl.ctcomponent/src/main/java/com/zyxk/sl/ctcomponent/dto/DtoSaleOrderAsyn.java	(revision 8749)
+@@ -15,6 +15,26 @@
+     /** 用户id*/
+     private String userId;
+ 
++    private String areaId;
++
++    private String orgId;
++
++    public String getAreaId() {
++        return areaId;
++    }
++
++    public void setAreaId(String areaId) {
++        this.areaId = areaId;
++    }
++
++    public String getOrgId() {
++        return orgId;
++    }
++
++    public void setOrgId(String orgId) {
++        this.orgId = orgId;
++    }
++
+     public String getUserId() {
+         return userId;
+     }
+Index: biz/restaurant/com.zyxk.sl.ctcommon/src/main/java/com/zyxk/sl/ctcommon/dto/pay/DtoPrivateRoomPrePay.java
+===================================================================
+--- biz/restaurant/com.zyxk.sl.ctcommon/src/main/java/com/zyxk/sl/ctcommon/dto/pay/DtoPrivateRoomPrePay.java	(revision 8661)
++++ biz/restaurant/com.zyxk.sl.ctcommon/src/main/java/com/zyxk/sl/ctcommon/dto/pay/DtoPrivateRoomPrePay.java	(revision 8749)
+@@ -53,6 +53,17 @@
+ 
+     private Integer requestSource;
+ 
++    /** 区域ID */
++    private String areaId;
++
++    public String getAreaId() {
++        return areaId;
++    }
++
++    public void setAreaId(String areaId) {
++        this.areaId = areaId;
++    }
++
+     public BigDecimal getFlowmoney() {
+         return flowmoney;
+     }
+Index: biz/restaurant/com.hzsun.shr.bxdcservice/src/main/java/com/hzsun/shr/bxdcservice/service/ISPrivateRoomOrderService.java
+===================================================================
+--- biz/restaurant/com.hzsun.shr.bxdcservice/src/main/java/com/hzsun/shr/bxdcservice/service/ISPrivateRoomOrderService.java	(revision 8661)
++++ biz/restaurant/com.hzsun.shr.bxdcservice/src/main/java/com/hzsun/shr/bxdcservice/service/ISPrivateRoomOrderService.java	(revision 8749)
+@@ -1,6 +1,7 @@
+ package com.hzsun.shr.bxdcservice.service;
+ 
+ import com.github.pagehelper.Page;
++import com.hzsun.shr.bxdcservice.dto.DtoCancelProduct;
+ import com.hzsun.shr.bxdcservice.dto.DtoCombinationOrder;
+ import com.hzsun.shr.bxdcservice.dto.DtoDecreaseProductList;
+ import com.hzsun.shr.bxdcservice.dto.DtoPrivateRoomOrder;
+@@ -114,7 +115,7 @@
+      * @author: sunjian
+      * @date: 2021/1/13 13:40
+      */
+-    void cancelOrder(String orderId, String userId);
++    void cancelOrder(DtoCancelProduct dto);
+ 
+ 
+     /**
+
+Property changes on: biz/restaurant/com.hzsun.shr.bxdcservice/src/main/java/com/hzsun/shr/bxdcservice/service/ISPrivateRoomOrderService.java
+___________________________________________________________________
+Modified: svn:mergeinfo
+   Merged /branches/DEV/02_Codes/shr-parent/biz/restaurant/com.hzsun.shr.bxdcservice/src/main/java/com/hzsun/shr/bxdcservice/service/ISPrivateRoomOrderService.java:r8656-8661
+Index: biz/restaurant/com.hzsun.shr.bxdcservice/src/main/java/com/hzsun/shr/bxdcservice/service/impl/SPrivateRoomCardPayServiceImpl.java
+===================================================================
+--- biz/restaurant/com.hzsun.shr.bxdcservice/src/main/java/com/hzsun/shr/bxdcservice/service/impl/SPrivateRoomCardPayServiceImpl.java	(revision 8661)
++++ biz/restaurant/com.hzsun.shr.bxdcservice/src/main/java/com/hzsun/shr/bxdcservice/service/impl/SPrivateRoomCardPayServiceImpl.java	(revision 8749)
+@@ -195,7 +195,7 @@
+                 record.setStatus(2);
+                 privateRoomTableMapper.updateByPrimaryKeySelective(record);
+                 //清除餐桌缓存
+-                privateRoomTableStatusCacheExpired.notify(Constant.BXDC_SERVICE_CODE, dto.getOrgId(), dto.getPrivateRoomAreaId());
++//                privateRoomTableStatusCacheExpired.notify(Constant.BXDC_SERVICE_CODE, dto.getOrgId(), dto.getPrivateRoomAreaId());
+             }
+ 
+             if (dto.getPayMode() == 100) {//现金支付
+@@ -356,7 +356,7 @@
+                 record.setStatus(2);
+                 privateRoomTableMapper.updateByPrimaryKeySelective(record);
+                 //清除餐桌缓存
+-                privateRoomTableStatusCacheExpired.notify(Constant.BXDC_SERVICE_CODE, dto.getOrgId(), dto.getPrivateRoomAreaId());
++//                privateRoomTableStatusCacheExpired.notify(Constant.BXDC_SERVICE_CODE, dto.getOrgId(), dto.getPrivateRoomAreaId());
+             }
+ 
+             VoUserIdentity userIdentity = userInfoCache.getUserInfoById(dto.getSession().getUserId(), dto.getTenantId());
+Index: biz/restaurant/com.hzsun.shr.bxdcservice/src/main/java/com/hzsun/shr/bxdcservice/service/impl/SPrivateRoomOrderPortalServiceImpl.java
+===================================================================
+--- biz/restaurant/com.hzsun.shr.bxdcservice/src/main/java/com/hzsun/shr/bxdcservice/service/impl/SPrivateRoomOrderPortalServiceImpl.java	(revision 8661)
++++ biz/restaurant/com.hzsun.shr.bxdcservice/src/main/java/com/hzsun/shr/bxdcservice/service/impl/SPrivateRoomOrderPortalServiceImpl.java	(revision 8749)
+@@ -191,7 +191,9 @@
+             query.setPayMoney(newSaleOrder.getPrice());
+             if(StringUtils.isBlank(newSaleOrder.getPrivateRoomOrderId())){
+                 //清除餐桌状态缓存
+-                cache.clearCache(Constant.BXDC_SERVICE_CODE, newSaleOrder.getOrgId(), newSaleOrder.getPrivateRoomAreaId());
++//                cache.clearCache(Constant.BXDC_SERVICE_CODE, newSaleOrder.getOrgId(), newSaleOrder.getPrivateRoomAreaId());
++                query.setClearAreaId(newSaleOrder.getPrivateRoomAreaId());
++                query.setClearOrgId(newSaleOrder.getOrgId());
+                 //清除购物车缓存
+                 privateRoomShoppingCart.clearShoppingCartRedis(newSaleOrder.getPrivateRoomTableId());
+             }
+
+Property changes on: biz/restaurant/com.hzsun.shr.bxdcservice/src/main/java/com/hzsun/shr/bxdcservice/service/impl/SPrivateRoomOrderPortalServiceImpl.java
+___________________________________________________________________
+Modified: svn:mergeinfo
+   Merged /branches/DEV/02_Codes/shr-parent/biz/restaurant/com.hzsun.shr.bxdcservice/src/main/java/com/hzsun/shr/bxdcservice/service/impl/SPrivateRoomOrderPortalServiceImpl.java:r8656-8661
+Index: biz/restaurant/com.hzsun.shr.bxdcservice/src/main/java/com/hzsun/shr/bxdcservice/service/impl/SCouponPayServiceImpl.java
+===================================================================
+--- biz/restaurant/com.hzsun.shr.bxdcservice/src/main/java/com/hzsun/shr/bxdcservice/service/impl/SCouponPayServiceImpl.java	(revision 8661)
++++ biz/restaurant/com.hzsun.shr.bxdcservice/src/main/java/com/hzsun/shr/bxdcservice/service/impl/SCouponPayServiceImpl.java	(revision 8749)
+@@ -190,6 +190,8 @@
+                 result.setResult(privateRoomOrder.getPayMoney());
+             } else {
+                 privateRoomOrderService.finishCombinationOrder(combinationOrder);
++                dto.setOrgId(combinationOrder.getOrgId());
++                dto.setAreaId(combinationOrder.getAreaId());
+             }
+         } else {
+             result.setCode(result2.getCode());
+@@ -203,7 +205,9 @@
+             record.setStatus(2);
+             privateRoomTableMapper.updateByPrimaryKeySelective(record);
+             //清除餐桌缓存
+-            privateRoomTableStatusCacheExpired.notify(Constant.BXDC_SERVICE_CODE, privateRoomOrder.getOrgId(), privateRoomOrder.getPrivateRoomAreaId());
++//            privateRoomTableStatusCacheExpired.notify(Constant.BXDC_SERVICE_CODE, privateRoomOrder.getOrgId(), privateRoomOrder.getPrivateRoomAreaId());
++            dto.setAreaId(privateRoomOrder.getPrivateRoomAreaId());
++            dto.setOrgId(privateRoomOrder.getOrgId());
+         }
+         return result;
+     }
+Index: biz/restaurant/com.hzsun.shr.bxdcservice/src/main/java/com/hzsun/shr/bxdcservice/service/impl/SPrivateRoomPrePayServiceImpl.java
+===================================================================
+--- biz/restaurant/com.hzsun.shr.bxdcservice/src/main/java/com/hzsun/shr/bxdcservice/service/impl/SPrivateRoomPrePayServiceImpl.java	(revision 8661)
++++ biz/restaurant/com.hzsun.shr.bxdcservice/src/main/java/com/hzsun/shr/bxdcservice/service/impl/SPrivateRoomPrePayServiceImpl.java	(revision 8749)
+@@ -24,10 +24,8 @@
+ import com.zyxk.sl.ctcommon.util.DataUtil;
+ import com.zyxk.sl.ctcommon.util.PayMessageUtil;
+ import com.zyxk.sl.ctcommon.vo.orderpay.VoOrderPayResult;
+-import com.zyxk.sl.ctcomponent.cache.PrivateRoomTableStatusCache;
+-import com.zyxk.sl.ctcomponent.cache.TenantIdCache;
+-import com.zyxk.sl.ctcomponent.cache.TransactionSettingCache;
+-import com.zyxk.sl.ctcomponent.cache.UserInfoCache;
++import com.zyxk.sl.ctcomponent.cache.*;
++import com.zyxk.sl.ctcomponent.dto.DtoSaleOrderAsyn;
+ import com.zyxk.sl.ctcomponent.dto.DtoSaleOrderAsynDetail;
+ import com.zyxk.sl.ctcomponent.entity.SAsyncPayRecord;
+ import com.zyxk.sl.ctcomponent.entity.SAsyncPayRecordExample;
+@@ -95,6 +93,8 @@
+     private ISPrivateRoomSignSettingService privateRoomSignSettingService;
+     @Autowired
+     private ISPrivateRoomPayCheckService privateRoomPayCheckService;
++    @Autowired
++    private PrivateRoomAreaIdCache areaIdCache;
+ 
+     private DtoCombinationOrder createCombinationOrder(DtoPrivateRoomPrePay dto) {
+         DtoCombinationOrder combinationOrder = new DtoCombinationOrder();
+@@ -244,6 +244,8 @@
+                     privateRoomSignSettingService.deleteOrderSignInfo(orderId);
+                 }
+             }
++            //设置区域ID
++            aggregatePay.setAreaId(areaIdCache.getAreaIdByTableId(order.getPrivateRoomTableId()));
+             VoUserIdentity userIdentity = userInfoCache.getUserInfoById(userId, dtoSession.getTenantId());
+             if (userIdentity.getIsBusiness() == 1) {
+                 privateRoomOrderExMapper.updateSaleOrderUserId(userId, new Date(), orderId);
+@@ -357,7 +359,9 @@
+                         order.getPrivateRoomTableId(), update);
+ 
+                 //清除餐桌状态
+-                cache.clearCache(Constant.BXDC_SERVICE_CODE, order.getOrgId(), order.getPrivateRoomAreaId());
++//                cache.clearCache(Constant.BXDC_SERVICE_CODE, order.getOrgId(), order.getPrivateRoomAreaId());
++                dto.setAreaId(order.getPrivateRoomAreaId());
++                dto.setOrgId(order.getOrgId());
+                 //清除缓存
+                 privateRoomShoppingCart.clearShoppingCartRedis(order.getPrivateRoomTableId());
+             } else {
+@@ -478,12 +482,15 @@
+ 
+     @Override
+     public List<DtoFailInfo> dealPrivatRoomPrePayOrderByIds(Set<String> saleOrderIds,
+-                                                            String userId, List<DtoSaleOrderAsynDetail> details) {
++                                                            DtoSaleOrderAsyn saleOrderAsyn) {
+ 
+         if (CollectionUtils.isEmpty(saleOrderIds)) return Collections.EMPTY_LIST;
+ 
+         List<DtoFailInfo> failList = new ArrayList<>();
+ 
++        List<DtoSaleOrderAsynDetail> details = saleOrderAsyn.getDetails();
++        String userId = saleOrderAsyn.getUserId();
++
+         for (String payLogId : saleOrderIds) {
+ 
+             logger.info("支付回调,开始处理payLog订单明细ID={}", payLogId);
+@@ -500,6 +507,10 @@
+ 
+             if (order.getCombination().equals(CombinationType.COMBINATION.getStatus())) {
+                 dealCombinationOrder(failList, privateRoomPayLog, tenantIdCache.getTenantId(order.getOrgId(), Constant.BXDC_SERVICE_CODE));
++                if(CollectionUtils.isEmpty(failList)){
++                    saleOrderAsyn.setAreaId(order.getPrivateRoomAreaId());
++                    saleOrderAsyn.setOrgId(order.getOrgId());
++                }
+             } else {//单笔支付
+                 String saleOrderId = order.getId();
+                 //包厢点餐 渠道类型为3
+@@ -563,7 +574,9 @@
+                             order.getPrivateRoomTableId(), update);
+ 
+                     //清除餐桌状态
+-                    cache.clearCache(Constant.BXDC_SERVICE_CODE, order.getOrgId(), order.getPrivateRoomAreaId());
++//                    cache.clearCache(Constant.BXDC_SERVICE_CODE, order.getOrgId(), order.getPrivateRoomAreaId());
++                    saleOrderAsyn.setAreaId(order.getPrivateRoomAreaId());
++                    saleOrderAsyn.setOrgId(order.getOrgId());
+ 
+                     //清除缓存
+                     privateRoomShoppingCart.clearShoppingCartRedis(order.getPrivateRoomTableId());
+
+Property changes on: biz/restaurant/com.hzsun.shr.bxdcservice/src/main/java/com/hzsun/shr/bxdcservice/service/impl/SPrivateRoomPrePayServiceImpl.java
+___________________________________________________________________
+Modified: svn:mergeinfo
+   Merged /branches/DEV/02_Codes/shr-parent/biz/restaurant/com.hzsun.shr.bxdcservice/src/main/java/com/hzsun/shr/bxdcservice/service/impl/SPrivateRoomPrePayServiceImpl.java:r8656-8661
+Index: biz/restaurant/com.hzsun.shr.bxdcservice/src/main/java/com/hzsun/shr/bxdcservice/service/impl/SPrivateRoomOrderServiceImpl.java
+===================================================================
+--- biz/restaurant/com.hzsun.shr.bxdcservice/src/main/java/com/hzsun/shr/bxdcservice/service/impl/SPrivateRoomOrderServiceImpl.java	(revision 8661)
++++ biz/restaurant/com.hzsun.shr.bxdcservice/src/main/java/com/hzsun/shr/bxdcservice/service/impl/SPrivateRoomOrderServiceImpl.java	(revision 8749)
+@@ -348,7 +348,8 @@
+         // 修改餐桌状态
+         privateRoomTableSettingExMapper.updateTableStatus(dto.getTableId(), 1, dto.getUserId(), date);
+         // 清除餐桌缓存
+-        privateRoomTableStatusCacheExpired.notify(Constant.BXDC_SERVICE_CODE, dto.getOrgId(), areaId);
++//        privateRoomTableStatusCacheExpired.notify(Constant.BXDC_SERVICE_CODE, dto.getOrgId(), areaId);
++        dto.setAreaId(areaId);
+ 
+         orderPrinter.setTotalMoney(totalPrice);
+         orderPrinter.setPayMoney(totalPrice);
+@@ -955,8 +956,11 @@
+ 
+     @Transactional
+     @Override
+-    public void cancelOrder(String orderId, String userId) {
++    public void cancelOrder(DtoCancelProduct dto) {
+ 
++        String orderId = dto.getOrderId();
++        String userId = dto.getUserId();
++
+         VoPrivateRoomOrder privateRoomOrder = privateRoomOrderExMapper.getOrderDetailByCancel(orderId);
+ 
+         Date date = new Date();
+@@ -985,9 +989,10 @@
+         SPrivateRoomOrder order = privateRoomOrderMapper.selectByPrimaryKey(orderId);
+         privateRoomTableSettingExMapper.updateTableStatus(order.getPrivateRoomTableId(), 0, userId, date);
+         // 清除餐桌缓存
+-        privateRoomTableStatusCacheExpired.notify(Constant.BXDC_SERVICE_CODE, order.getOrgId(), order.getPrivateRoomAreaId());
++//        privateRoomTableStatusCacheExpired.notify(Constant.BXDC_SERVICE_CODE, order.getOrgId(), order.getPrivateRoomAreaId());
++        dto.setOrgId(order.getOrgId());
++        dto.setAreaId(order.getPrivateRoomAreaId());
+ 
+-
+         //清除所有缓存
+         privateRoomShoppingCart.clearShoppingCartRedis(order.getPrivateRoomTableId());
+ 
+@@ -1510,7 +1515,9 @@
+                     logger.info("组合支付 订单ID={} 修改餐桌状态为已支付", id);
+                     privateRoomOrderExMapper.updateTableStatus(order.getPrivateRoomTableId(), 2, new Date());
+                     //清除餐桌缓存
+-                    privateRoomTableStatusCacheExpired.notify(Constant.BXDC_SERVICE_CODE, order.getOrgId(), order.getPrivateRoomAreaId());
++//                    privateRoomTableStatusCacheExpired.notify(Constant.BXDC_SERVICE_CODE, order.getOrgId(), order.getPrivateRoomAreaId());
++                    dto.setOrgId(order.getOrgId());
++                    dto.setAreaId(order.getPrivateRoomAreaId());
+ 
+                     privateRoomShoppingCart.clearShoppingCartRedis(order.getPrivateRoomTableId());
+                 }
+
+Property changes on: biz/restaurant/com.hzsun.shr.bxdcservice/src/main/java/com/hzsun/shr/bxdcservice/service/impl/SPrivateRoomOrderServiceImpl.java
+___________________________________________________________________
+Modified: svn:mergeinfo
+   Merged /branches/DEV/02_Codes/shr-parent/biz/restaurant/com.hzsun.shr.bxdcservice/src/main/java/com/hzsun/shr/bxdcservice/service/impl/SPrivateRoomOrderServiceImpl.java:r8656-8661
+Index: biz/restaurant/com.hzsun.shr.bxdcservice/src/main/java/com/hzsun/shr/bxdcservice/service/ISPrivateRoomPrePayService.java
+===================================================================
+--- biz/restaurant/com.hzsun.shr.bxdcservice/src/main/java/com/hzsun/shr/bxdcservice/service/ISPrivateRoomPrePayService.java	(revision 8661)
++++ biz/restaurant/com.hzsun.shr.bxdcservice/src/main/java/com/hzsun/shr/bxdcservice/service/ISPrivateRoomPrePayService.java	(revision 8749)
+@@ -4,6 +4,7 @@
+ import com.zyxk.sl.ctcommon.dto.DtoFailInfo;
+ import com.zyxk.sl.ctcommon.dto.pay.DtoPayResult;
+ import com.zyxk.sl.ctcommon.dto.pay.DtoPrivateRoomPrePay;
++import com.zyxk.sl.ctcomponent.dto.DtoSaleOrderAsyn;
+ import com.zyxk.sl.ctcomponent.dto.DtoSaleOrderAsynDetail;
+ import com.zyxk.sl.ctcomponent.httpclient.dto.TogetherPayMainScanCondition;
+ 
+@@ -38,7 +39,6 @@
+      * @return
+      */
+     public List<DtoFailInfo> dealPrivatRoomPrePayOrderByIds(Set<String> saleOrderIds,
+-                                                            String userId,
+-                                                            List<DtoSaleOrderAsynDetail> details);
++                                                            DtoSaleOrderAsyn saleOrderAsyn);
+ 
+ }
+Index: biz/restaurant/com.hzsun.shr.bxdcservice/src/main/java/com/hzsun/shr/bxdcservice/component/PrePayComponent.java
+===================================================================
+--- biz/restaurant/com.hzsun.shr.bxdcservice/src/main/java/com/hzsun/shr/bxdcservice/component/PrePayComponent.java	(revision 8661)
++++ biz/restaurant/com.hzsun.shr.bxdcservice/src/main/java/com/hzsun/shr/bxdcservice/component/PrePayComponent.java	(revision 8749)
+@@ -201,7 +201,7 @@
+                 privateRoomOrderExMapper
+                         .updateTableStatus(newSaleOrder.getPrivateRoomTableId(), 2, new Date());
+                 //清除餐桌状态缓存
+-                cache.clearCache(Constant.BXDC_SERVICE_CODE, newSaleOrder.getOrgId(), newSaleOrder.getPrivateRoomAreaId());
++//                cache.clearCache(Constant.BXDC_SERVICE_CODE, newSaleOrder.getOrgId(), newSaleOrder.getPrivateRoomAreaId());
+             }
+ 
+             privateRoomOrder.setFlowNo(updateStatus.getOutSystemOrderCode()); //第3方订单号
+Index: biz/restaurant/com.hzsun.shr.bxdcservice/src/main/java/com/hzsun/shr/bxdcservice/ctrl/BaseController.java
+===================================================================
+--- biz/restaurant/com.hzsun.shr.bxdcservice/src/main/java/com/hzsun/shr/bxdcservice/ctrl/BaseController.java	(revision 8661)
++++ biz/restaurant/com.hzsun.shr.bxdcservice/src/main/java/com/hzsun/shr/bxdcservice/ctrl/BaseController.java	(revision 8749)
+@@ -10,10 +10,12 @@
+ import com.zyxk.sl.ctcommon.dto.DtoSession;
+ import com.zyxk.sl.ctcommon.exception.TokenInvalidException;
+ import com.zyxk.sl.ctcommon.exception.ZyxtBaseRuntimeException;
++import com.zyxk.sl.ctcomponent.cache.expired.bxdcservice.PrivateRoomTableStatusCacheExpired;
+ import net.bytebuddy.implementation.bytecode.Throw;
+ import org.apache.commons.lang.StringUtils;
+ import org.slf4j.Logger;
+ import org.slf4j.LoggerFactory;
++import org.springframework.beans.factory.annotation.Autowired;
+ import org.springframework.http.converter.HttpMessageNotReadableException;
+ import org.springframework.util.CollectionUtils;
+ import org.springframework.validation.BindingResult;
+@@ -37,6 +39,9 @@
+ public class BaseController {
+     protected static Logger logger = LoggerFactory.getLogger(BaseController.class);
+ 
++    @Autowired
++    public PrivateRoomTableStatusCacheExpired privateRoomTableStatusCacheExpired;
++
+     @ExceptionHandler(MethodArgumentNotValidException.class)
+     @ResponseBody
+     public DtoResult handleMethodArgumentNotValidException(
+Index: biz/restaurant/com.hzsun.shr.bxdcservice/src/main/java/com/hzsun/shr/bxdcservice/ctrl/SPrivateRoomPrePayController.java
+===================================================================
+--- biz/restaurant/com.hzsun.shr.bxdcservice/src/main/java/com/hzsun/shr/bxdcservice/ctrl/SPrivateRoomPrePayController.java	(revision 8661)
++++ biz/restaurant/com.hzsun.shr.bxdcservice/src/main/java/com/hzsun/shr/bxdcservice/ctrl/SPrivateRoomPrePayController.java	(revision 8749)
+@@ -21,6 +21,7 @@
+ import com.zyxk.sl.ctcommon.vo.orderpay.VoOrderPayResult;
+ import com.zyxk.sl.ctcomponent.cache.RoomPayChannelCache;
+ import com.zyxk.sl.ctcomponent.cache.RoomRepeatPayCache;
++import com.zyxk.sl.ctcomponent.cache.expired.bxdcservice.PrivateRoomTableStatusCacheExpired;
+ import com.zyxk.sl.ctcomponent.dto.DtoRepeatPay;
+ import com.zyxk.sl.ctcomponent.dto.DtoSaleOrderAsyn;
+ import com.zyxk.sl.ctcomponent.httpclient.dto.TogetherPayMainScanCondition;
+@@ -126,6 +127,7 @@
+                 } else {
+                     result.setResult(new VoOrderPayResult());
+                 }
++                privateRoomTableStatusCacheExpired.notify(Constant.BXDC_SERVICE_CODE,orgId,aggregatePay.getAreaId());
+             } else {
+                 if (aggregatePay.getCombination().equals(CombinationType.SIGNLE.getStatus())) {
+                     privateRoomCardPayService.updateSignleOrderById(saleOrderId);
+@@ -182,6 +184,7 @@
+         try {
+             roomPayChannelCache.setPayChannel(dto.getOrderId(), RoomPayChannel.MAINSWEEP.getType(), NumberUtil.getExpireTime(expireTime));
+             result = privateRoomPrePayService.getMainScan(dto);
++            privateRoomTableStatusCacheExpired.notify(Constant.BXDC_SERVICE_CODE,dto.getOrgId(),dto.getAreaId());
+         } catch (Exception e) {
+             logger.error(e.getMessage());
+             result.setCode(Constant.RESULT_CODE_FAILED);
+@@ -233,10 +236,12 @@
+         logger.info("根据订单ID处理支付回调. saleOrderIds={}", saleOrderSet);
+ 
+         List<DtoFailInfo> failInfoList = privateRoomPrePayService
+-                .dealPrivatRoomPrePayOrderByIds(saleOrderSet, saleOrderAsyn.getUserId() ,saleOrderAsyn.getDetails());
++                .dealPrivatRoomPrePayOrderByIds(saleOrderSet, saleOrderAsyn);
+ 
+         if (!CollectionUtils.isEmpty(failInfoList)) {
+             result.setResult(failInfoList);
++        }else {
++            privateRoomTableStatusCacheExpired.notify(Constant.BXDC_SERVICE_CODE,saleOrderAsyn.getOrgId(),saleOrderAsyn.getAreaId());
+         }
+ 
+         return result;
+Index: biz/restaurant/com.hzsun.shr.bxdcservice/src/main/java/com/hzsun/shr/bxdcservice/ctrl/portal/SPrivateRoomOrderPortalController.java
+===================================================================
+--- biz/restaurant/com.hzsun.shr.bxdcservice/src/main/java/com/hzsun/shr/bxdcservice/ctrl/portal/SPrivateRoomOrderPortalController.java	(revision 8661)
++++ biz/restaurant/com.hzsun.shr.bxdcservice/src/main/java/com/hzsun/shr/bxdcservice/ctrl/portal/SPrivateRoomOrderPortalController.java	(revision 8749)
+@@ -118,6 +118,7 @@
+                 Map<String, String> map = new HashMap<>();
+                 map.put("payMoney", query.getPayMoney().toString());
+                 result.setResult(map);
++                privateRoomTableStatusCacheExpired.notify(Constant.BXDC_SERVICE_CODE,query.getClearOrgId(),query.getClearAreaId());
+             }
+         } catch (ZyxtBaseRuntimeException e) {
+             logger.error("订单签单接口报错！", e);
+Index: biz/restaurant/com.hzsun.shr.bxdcservice/src/main/java/com/hzsun/shr/bxdcservice/ctrl/portal/SOrderProductController.java
+===================================================================
+--- biz/restaurant/com.hzsun.shr.bxdcservice/src/main/java/com/hzsun/shr/bxdcservice/ctrl/portal/SOrderProductController.java	(revision 8661)
++++ biz/restaurant/com.hzsun.shr.bxdcservice/src/main/java/com/hzsun/shr/bxdcservice/ctrl/portal/SOrderProductController.java	(revision 8749)
+@@ -121,7 +121,8 @@
+             return new DtoResult(Constant.RESULT_CODE_FAILED, "订单正在支付中，不能撤单！");
+         }
+         try {
+-            privateRoomOrderService.cancelOrder(dto.getOrderId(), dto.getUserId());
++            privateRoomOrderService.cancelOrder(dto);
++            privateRoomTableStatusCacheExpired.notify(Constant.BXDC_SERVICE_CODE,dto.getOrgId(),dto.getAreaId());
+             return new DtoResult(Constant.RESULT_CODE_SUCCESS, "撤单成功！");
+         } catch (ZyxtBaseRuntimeException e) {
+             return new DtoResult(e.getCode(), e.getMessage());
+Index: biz/restaurant/com.hzsun.shr.bxdcservice/src/main/java/com/hzsun/shr/bxdcservice/ctrl/portal
+===================================================================
+--- biz/restaurant/com.hzsun.shr.bxdcservice/src/main/java/com/hzsun/shr/bxdcservice/ctrl/portal	(revision 8661)
++++ biz/restaurant/com.hzsun.shr.bxdcservice/src/main/java/com/hzsun/shr/bxdcservice/ctrl/portal	(revision 8749)
+
+Property changes on: biz/restaurant/com.hzsun.shr.bxdcservice/src/main/java/com/hzsun/shr/bxdcservice/ctrl/portal
+___________________________________________________________________
+Modified: svn:mergeinfo
+   Merged /branches/DEV/02_Codes/shr-parent/biz/restaurant/com.hzsun.shr.bxdcservice/src/main/java/com/hzsun/shr/bxdcservice/ctrl/portal:r8656-8661
+Index: biz/restaurant/com.hzsun.shr.bxdcservice/src/main/java/com/hzsun/shr/bxdcservice/ctrl/SPrivateRoomAreaController.java
+===================================================================
+--- biz/restaurant/com.hzsun.shr.bxdcservice/src/main/java/com/hzsun/shr/bxdcservice/ctrl/SPrivateRoomAreaController.java	(revision 8661)
++++ biz/restaurant/com.hzsun.shr.bxdcservice/src/main/java/com/hzsun/shr/bxdcservice/ctrl/SPrivateRoomAreaController.java	(revision 8749)
+@@ -9,7 +9,6 @@
+ import com.zyxk.sl.ctcommon.exception.ZyxtBaseRuntimeException;
+ import com.zyxk.sl.ctcommon.validation.groups.common.ModifyGroup;
+ import com.zyxk.sl.ctcommon.validation.groups.common.ViewGroup;
+-import com.zyxk.sl.ctcomponent.cache.expired.bxdcservice.PrivateRoomTableStatusCacheExpired;
+ import org.apache.commons.lang3.StringUtils;
+ import org.slf4j.Logger;
+ import org.slf4j.LoggerFactory;
+@@ -34,8 +33,6 @@
+     @Autowired
+     private ISPrivateRoomAreaSettingService privateRoomAreaSettingService;
+     @Autowired
+-    private PrivateRoomTableStatusCacheExpired tableStatusCacheExpired;
+-    @Autowired
+     private ISPrivateRoomShoppingCart privateRoomShoppingCart;
+ 
+     /**
+@@ -105,7 +102,7 @@
+             SPrivateRoomOrder order = privateRoomAreaSettingService.updateUserAreaTableStatus(query);
+             result.setResult("保存成功！");
+             if(order != null){
+-                tableStatusCacheExpired.notify(Constant.BXDC_SERVICE_CODE, order.getOrgId(), order.getPrivateRoomAreaId());
++                privateRoomTableStatusCacheExpired.notify(Constant.BXDC_SERVICE_CODE, order.getOrgId(), order.getPrivateRoomAreaId());
+                 privateRoomShoppingCart.clearShoppingCartRedis(order.getPrivateRoomTableId());
+             }
+         } catch (ZyxtBaseRuntimeException e) {
+Index: biz/restaurant/com.hzsun.shr.bxdcservice/src/main/java/com/hzsun/shr/bxdcservice/ctrl/SPrivateRoomOrderController.java
+===================================================================
+--- biz/restaurant/com.hzsun.shr.bxdcservice/src/main/java/com/hzsun/shr/bxdcservice/ctrl/SPrivateRoomOrderController.java	(revision 8661)
++++ biz/restaurant/com.hzsun.shr.bxdcservice/src/main/java/com/hzsun/shr/bxdcservice/ctrl/SPrivateRoomOrderController.java	(revision 8749)
+@@ -18,6 +18,7 @@
+ import com.zyxk.sl.ctcommon.util.DateUtil;
+ import com.zyxk.sl.ctcommon.util.StringUtil;
+ import com.zyxk.sl.ctcomponent.cache.PrivateRoomDinerNumCache;
++import com.zyxk.sl.ctcomponent.cache.expired.bxdcservice.PrivateRoomTableStatusCacheExpired;
+ import org.apache.commons.lang3.StringUtils;
+ import org.slf4j.Logger;
+ import org.slf4j.LoggerFactory;
+@@ -84,6 +85,7 @@
+                 VoOrderPrinter orderPrinter = sprivateRoomOrderService.saveSaleOrder(dto);
+ 
+                 tableSet.remove(dto.getTableId());
++                privateRoomTableStatusCacheExpired.notify(Constant.BXDC_SERVICE_CODE,dto.getOrgId(),dto.getAreaId());
+                 return new DtoResult(Constant.RESULT_CODE_SUCCESS, orderPrinter);
+             } else {
+                 return new DtoResult(Constant.RESULT_CODE_FAILED, "该餐桌当前已有订单！");
+
+Property changes on: biz/restaurant/com.hzsun.shr.bxdcservice/src/main/java/com/hzsun/shr/bxdcservice/ctrl/SPrivateRoomOrderController.java
+___________________________________________________________________
+Modified: svn:mergeinfo
+   Merged /branches/DEV/02_Codes/shr-parent/biz/restaurant/com.hzsun.shr.bxdcservice/src/main/java/com/hzsun/shr/bxdcservice/ctrl/SPrivateRoomOrderController.java:r8656-8661
+Index: biz/restaurant/com.hzsun.shr.bxdcservice/src/main/java/com/hzsun/shr/bxdcservice/ctrl/setting/SPrivateRoomTableSettingController.java
+===================================================================
+--- biz/restaurant/com.hzsun.shr.bxdcservice/src/main/java/com/hzsun/shr/bxdcservice/ctrl/setting/SPrivateRoomTableSettingController.java	(revision 8661)
++++ biz/restaurant/com.hzsun.shr.bxdcservice/src/main/java/com/hzsun/shr/bxdcservice/ctrl/setting/SPrivateRoomTableSettingController.java	(revision 8749)
+@@ -42,8 +42,6 @@
+     private ISPrivateRoomTableSettingService privateRoomTableSettingService;
+     @Autowired
+     private PrivateRoomCacheExpired privateRoomCacheExpired;
+-    @Autowired
+-    private PrivateRoomTableStatusCacheExpired privateRoomTableStatusCacheExpired;
+ 
+     /**
+      * 列表查询
+Index: biz/restaurant/com.hzsun.shr.bxdcservice/src/main/java/com/hzsun/shr/bxdcservice/ctrl/setting
+===================================================================
+--- biz/restaurant/com.hzsun.shr.bxdcservice/src/main/java/com/hzsun/shr/bxdcservice/ctrl/setting	(revision 8661)
++++ biz/restaurant/com.hzsun.shr.bxdcservice/src/main/java/com/hzsun/shr/bxdcservice/ctrl/setting	(revision 8749)
+
+Property changes on: biz/restaurant/com.hzsun.shr.bxdcservice/src/main/java/com/hzsun/shr/bxdcservice/ctrl/setting
+___________________________________________________________________
+Modified: svn:mergeinfo
+   Merged /branches/DEV/02_Codes/shr-parent/biz/restaurant/com.hzsun.shr.bxdcservice/src/main/java/com/hzsun/shr/bxdcservice/ctrl/setting:r8169-8200,8409-8425,8656-8661
+Index: biz/restaurant/com.hzsun.shr.bxdcservice/src/main/java/com/hzsun/shr/bxdcservice/ctrl/SPrivateRoomCardPayController.java
+===================================================================
+--- biz/restaurant/com.hzsun.shr.bxdcservice/src/main/java/com/hzsun/shr/bxdcservice/ctrl/SPrivateRoomCardPayController.java	(revision 8661)
++++ biz/restaurant/com.hzsun.shr.bxdcservice/src/main/java/com/hzsun/shr/bxdcservice/ctrl/SPrivateRoomCardPayController.java	(revision 8749)
+@@ -24,6 +24,7 @@
+ import com.zyxk.sl.ctcommon.vo.orderpay.VoOrderPayResult;
+ import com.zyxk.sl.ctcomponent.cache.OrganizationCache;
+ import com.zyxk.sl.ctcomponent.cache.RoomPayChannelCache;
++import com.zyxk.sl.ctcomponent.cache.expired.bxdcservice.PrivateRoomTableStatusCacheExpired;
+ import com.zyxk.sl.ctcomponent.dto.DtoPayCondition;
+ import com.zyxk.sl.ctcomponent.pay.OrderPayComponent;
+ import com.zyxk.sl.ctcomponent.service.ICardPayCommonService;
+@@ -145,6 +146,7 @@
+                     //清除缓存
+                     privateRoomShoppingCart.clearShoppingCartRedis(dto.getPrivateRoomTableId());
+                 }
++                privateRoomTableStatusCacheExpired.notify(Constant.BXDC_SERVICE_CODE,dto.getOrgId(),dto.getPrivateRoomAreaId());
+ 
+             } catch (ZyxtBaseRuntimeException e) {
+                 //清除缓存
+@@ -511,6 +513,7 @@
+                     //清除缓存
+                     privateRoomShoppingCart.clearShoppingCartRedis(dto.getPrivateRoomTableId());
+                 }
++                privateRoomTableStatusCacheExpired.notify(Constant.BXDC_SERVICE_CODE,dto.getOrgId(),dto.getPrivateRoomAreaId());
+             } catch (ZyxtBaseRuntimeException e) {
+                 logger.error("双面机刷脸支付异常！", e);
+                 //清除缓存
+Index: biz/restaurant/com.hzsun.shr.bxdcservice/src/main/java/com/hzsun/shr/bxdcservice/ctrl/SCouponPayController.java
+===================================================================
+--- biz/restaurant/com.hzsun.shr.bxdcservice/src/main/java/com/hzsun/shr/bxdcservice/ctrl/SCouponPayController.java	(revision 8661)
++++ biz/restaurant/com.hzsun.shr.bxdcservice/src/main/java/com/hzsun/shr/bxdcservice/ctrl/SCouponPayController.java	(revision 8749)
+@@ -9,6 +9,7 @@
+ import com.zyxk.sl.ctcommon.exception.ZyxtBaseRuntimeException;
+ import com.zyxk.sl.ctcommon.rediskey.RedisLockKey;
+ import com.zyxk.sl.ctcomponent.cache.RoomPayChannelCache;
++import com.zyxk.sl.ctcomponent.cache.expired.bxdcservice.PrivateRoomTableStatusCacheExpired;
+ import org.redisson.api.RLock;
+ import org.redisson.api.RedissonClient;
+ import org.slf4j.Logger;
+@@ -65,6 +66,7 @@
+             logger.debug("优惠券支付参数{}", dto.toString());
+             try {
+                 result = couponPayService.couponPay(dto, this.getSessionDTO());
++                privateRoomTableStatusCacheExpired.notify(Constant.BXDC_SERVICE_CODE,dto.getOrgId(),dto.getAreaId());
+             } catch (ZyxtBaseRuntimeException e) {
+                 result.setCode(e.getCode());
+                 result.setResult(e.getMessage());
+Index: biz/restaurant/com.hzsun.shr.bxdcservice/src/main/java/com/hzsun/shr/bxdcservice/mapper
+===================================================================
+--- biz/restaurant/com.hzsun.shr.bxdcservice/src/main/java/com/hzsun/shr/bxdcservice/mapper	(revision 8661)
++++ biz/restaurant/com.hzsun.shr.bxdcservice/src/main/java/com/hzsun/shr/bxdcservice/mapper	(revision 8749)
+
+Property changes on: biz/restaurant/com.hzsun.shr.bxdcservice/src/main/java/com/hzsun/shr/bxdcservice/mapper
+___________________________________________________________________
+Modified: svn:mergeinfo
+   Merged /branches/DEV/02_Codes/shr-parent/biz/restaurant/com.hzsun.shr.bxdcservice/src/main/java/com/hzsun/shr/bxdcservice/mapper:r8169-8200
+Index: biz/restaurant/com.hzsun.shr.bxdcservice/src/main/java/com/hzsun/shr/bxdcservice/vo
+===================================================================
+--- biz/restaurant/com.hzsun.shr.bxdcservice/src/main/java/com/hzsun/shr/bxdcservice/vo	(revision 8661)
++++ biz/restaurant/com.hzsun.shr.bxdcservice/src/main/java/com/hzsun/shr/bxdcservice/vo	(revision 8749)
+
+Property changes on: biz/restaurant/com.hzsun.shr.bxdcservice/src/main/java/com/hzsun/shr/bxdcservice/vo
+___________________________________________________________________
+Modified: svn:mergeinfo
+   Merged /branches/DEV/02_Codes/shr-parent/biz/restaurant/com.hzsun.shr.bxdcservice/src/main/java/com/hzsun/shr/bxdcservice/vo:r8169-8200,8409-8425
+Index: biz/restaurant/com.hzsun.shr.bxdcservice/src/main/java/com/hzsun/shr/bxdcservice/dto/DtoPrivateRoomOrder.java
+===================================================================
+--- biz/restaurant/com.hzsun.shr.bxdcservice/src/main/java/com/hzsun/shr/bxdcservice/dto/DtoPrivateRoomOrder.java	(revision 8661)
++++ biz/restaurant/com.hzsun.shr.bxdcservice/src/main/java/com/hzsun/shr/bxdcservice/dto/DtoPrivateRoomOrder.java	(revision 8749)
+@@ -17,6 +17,7 @@
+     private String orderId;
+     private String userId;
+     private String tableId;
++    private String areaId;
+     private Integer dinerNum;
+     private String remarks;
+     private BigDecimal price;
+@@ -29,6 +30,14 @@
+     public DtoPrivateRoomOrder() {
+     }
+ 
++    public String getAreaId() {
++        return areaId;
++    }
++
++    public void setAreaId(String areaId) {
++        this.areaId = areaId;
++    }
++
+     public String getOrgId() {
+         return orgId;
+     }
+Index: biz/restaurant/com.hzsun.shr.bxdcservice/src/main/java/com/hzsun/shr/bxdcservice/dto/DtoPrivateRoomOrderPortalQuery.java
+===================================================================
+--- biz/restaurant/com.hzsun.shr.bxdcservice/src/main/java/com/hzsun/shr/bxdcservice/dto/DtoPrivateRoomOrderPortalQuery.java	(revision 8661)
++++ biz/restaurant/com.hzsun.shr.bxdcservice/src/main/java/com/hzsun/shr/bxdcservice/dto/DtoPrivateRoomOrderPortalQuery.java	(revision 8749)
+@@ -37,6 +37,11 @@
+     @NotBlank(message = "餐桌ID为空！" ,groups = {ChangeTableGroup.class})
+     private String tableId;
+ 
++    /** redis中区域ID */
++    private String clearAreaId;
++
++    private String clearOrgId;
++
+     /** 签单部门名称 */
+     private String roleName;
+ 
+Index: biz/restaurant/com.hzsun.shr.bxdcservice/src/main/java/com/hzsun/shr/bxdcservice/dto/DtoCouponPayCondition.java
+===================================================================
+--- biz/restaurant/com.hzsun.shr.bxdcservice/src/main/java/com/hzsun/shr/bxdcservice/dto/DtoCouponPayCondition.java	(revision 8661)
++++ biz/restaurant/com.hzsun.shr.bxdcservice/src/main/java/com/hzsun/shr/bxdcservice/dto/DtoCouponPayCondition.java	(revision 8749)
+@@ -42,4 +42,8 @@
+     @NotEmpty(message = "优惠券不能为空！")
+     private List<DtoCouponNum> couponNums;
+ 
++    private String areaId;
++
++    private String orgId;
++
+ }
+Index: biz/restaurant/com.hzsun.shr.bxdcservice/src/main/java/com/hzsun/shr/bxdcservice/dto/DtoCancelProduct.java
+===================================================================
+--- biz/restaurant/com.hzsun.shr.bxdcservice/src/main/java/com/hzsun/shr/bxdcservice/dto/DtoCancelProduct.java	(revision 8661)
++++ biz/restaurant/com.hzsun.shr.bxdcservice/src/main/java/com/hzsun/shr/bxdcservice/dto/DtoCancelProduct.java	(revision 8749)
+@@ -12,6 +12,26 @@
+     @NotBlank(message = "userId不能为空")
+     private String userId;
+ 
++    private String orgId;
++
++    private String areaId;
++
++    public String getOrgId() {
++        return orgId;
++    }
++
++    public void setOrgId(String orgId) {
++        this.orgId = orgId;
++    }
++
++    public String getAreaId() {
++        return areaId;
++    }
++
++    public void setAreaId(String areaId) {
++        this.areaId = areaId;
++    }
++
+     public DtoCancelProduct() {
+     }
+ 
+Index: biz/restaurant/com.hzsun.shr.bxdcservice/src/main/java/com/hzsun/shr/bxdcservice/dto/DtoCombinationOrder.java
+===================================================================
+--- biz/restaurant/com.hzsun.shr.bxdcservice/src/main/java/com/hzsun/shr/bxdcservice/dto/DtoCombinationOrder.java	(revision 8661)
++++ biz/restaurant/com.hzsun.shr.bxdcservice/src/main/java/com/hzsun/shr/bxdcservice/dto/DtoCombinationOrder.java	(revision 8749)
+@@ -53,6 +53,10 @@
+ 
+     private Integer payChannel;
+ 
++    private String areaId;
++
++    private String orgId;
++
+     public DtoCombinationOrder() {
+     }
+ 
+Index: biz/restaurant/com.hzsun.shr.bxdcservice/src/main/java/com/hzsun/shr/bxdcservice/dto
+===================================================================
+--- biz/restaurant/com.hzsun.shr.bxdcservice/src/main/java/com/hzsun/shr/bxdcservice/dto	(revision 8661)
++++ biz/restaurant/com.hzsun.shr.bxdcservice/src/main/java/com/hzsun/shr/bxdcservice/dto	(revision 8749)
+
+Property changes on: biz/restaurant/com.hzsun.shr.bxdcservice/src/main/java/com/hzsun/shr/bxdcservice/dto
+___________________________________________________________________
+Modified: svn:mergeinfo
+   Merged /branches/DEV/02_Codes/shr-parent/biz/restaurant/com.hzsun.shr.bxdcservice/src/main/java/com/hzsun/shr/bxdcservice/dto:r8131-8138,8656-8661
+Index: biz/restaurant/com.hzsun.shr.bxdcservice/src/main/java/com/hzsun/shr/bxdcservice/common
+===================================================================
+--- biz/restaurant/com.hzsun.shr.bxdcservice/src/main/java/com/hzsun/shr/bxdcservice/common	(revision 8661)
++++ biz/restaurant/com.hzsun.shr.bxdcservice/src/main/java/com/hzsun/shr/bxdcservice/common	(revision 8749)
+
+Property changes on: biz/restaurant/com.hzsun.shr.bxdcservice/src/main/java/com/hzsun/shr/bxdcservice/common
+___________________________________________________________________
+Modified: svn:mergeinfo
+   Merged /branches/DEV/02_Codes/shr-parent/biz/restaurant/com.hzsun.shr.bxdcservice/src/main/java/com/hzsun/shr/bxdcservice/common:r8169-8200
+Index: biz/base/com.xk.msa.config
+===================================================================
+--- biz/base/com.xk.msa.config	(revision 8661)
++++ biz/base/com.xk.msa.config	(revision 8749)
+
+Property changes on: biz/base/com.xk.msa.config
+___________________________________________________________________
+Modified: svn:mergeinfo
+   Merged /branches/DEV/02_Codes/shr-parent/biz/base/com.xk.msa.config:r8151-8161,8289-8310
+Index: biz/inventory/com.zyxk.sl.cgservice/src/main/resources/com/zyxk/sl/cgservice/mapper/SSupplierMapper.xml
+===================================================================
+--- biz/inventory/com.zyxk.sl.cgservice/src/main/resources/com/zyxk/sl/cgservice/mapper/SSupplierMapper.xml	(revision 8661)
++++ biz/inventory/com.zyxk.sl.cgservice/src/main/resources/com/zyxk/sl/cgservice/mapper/SSupplierMapper.xml	(revision 8749)
+@@ -391,4 +391,43 @@
+     <select id="selectName" resultType="String">
+         select zsxm from s_user where active=1 and userid=#{userId,jdbcType=VARCHAR}
+     </select>
++
++    <select id="getSupplierGradeInfo" resultType="com.zyxk.sl.cgservice.vo.VoSupplierAssess">
++        select t.supplierid as supplierId,t.gysmc as supplierName,a.SUPPLIERASSESSID as supplierAssessId,a.GRADE as grade,a.REMARK as remark
++        from s_supplier t
++        left join S_SUPPLIER_ASSESS a on t.SUPPLIERID =a.SUPPLIERID and a.active =1
++        where t.active =1
++        <if test="tenant != null">
++            and t.zhbs=#{tenant,jdbcType=VARCHAR}
++        </if>
++        <if test="supplierName!=null and supplierName != ''">
++            and (t.gysmc like '%'||#{supplierName}||'%' or t.gyszjm like '%' || upper(#{supplierName})||'%')
++        </if>
++        order by t.gysmc
++    </select>
++
++    <insert id="insertSupplierAssess">
++     insert into S_SUPPLIER_ASSESS(SUPPLIERASSESSID,SUPPLIERID,GRADE,REMARK,createuser,
++          createtime,lastmodifyuser,lastmodifytime,active)
++          values (
++            #{supplierAssessId,jdbcType=VARCHAR},
++            #{supplierId,jdbcType=VARCHAR},
++            #{grade,jdbcType=INTEGER},
++            #{remark,jdbcType=VARCHAR},
++            #{createUser,jdbcType=VARCHAR},
++            #{createTime,jdbcType=TIMESTAMP},
++            #{lastModifyUser,jdbcType=VARCHAR},
++            #{lastModifyTime,jdbcType=TIMESTAMP},
++             1)
++    </insert>
++
++    <update id="updateSupplierAssess">
++        update  S_SUPPLIER_ASSESS
++        set grade = #{grade,jdbcType=INTEGER},
++            REMARK = #{remark,jdbcType=VARCHAR},
++            lastmodifyuser = #{lastModifyUser,jdbcType=VARCHAR},
++            lastmodifytime  =#{lastModifyTime,jdbcType=TIMESTAMP}
++        where SUPPLIERASSESSID =  #{supplierAssessId,jdbcType=VARCHAR}
++    </update>
++
+ </mapper>
+\ No newline at end of file
+Index: biz/inventory/com.zyxk.sl.cgservice/src/main/java/com/zyxk/sl/cgservice/util
+===================================================================
+--- biz/inventory/com.zyxk.sl.cgservice/src/main/java/com/zyxk/sl/cgservice/util	(revision 8661)
++++ biz/inventory/com.zyxk.sl.cgservice/src/main/java/com/zyxk/sl/cgservice/util	(revision 8749)
+
+Property changes on: biz/inventory/com.zyxk.sl.cgservice/src/main/java/com/zyxk/sl/cgservice/util
+___________________________________________________________________
+Modified: svn:mergeinfo
+   Merged /branches/DEV/02_Codes/shr-parent/biz/inventory/com.zyxk.sl.cgservice/src/main/java/com/zyxk/sl/cgservice/util:r8548-8565
+Index: biz/inventory/com.zyxk.sl.cgservice/src/main/java/com/zyxk/sl/cgservice/service/IExcelService.java
+===================================================================
+--- biz/inventory/com.zyxk.sl.cgservice/src/main/java/com/zyxk/sl/cgservice/service/IExcelService.java	(revision 8661)
++++ biz/inventory/com.zyxk.sl.cgservice/src/main/java/com/zyxk/sl/cgservice/service/IExcelService.java	(revision 8749)
+@@ -2,6 +2,7 @@
+ 
+ import com.zyxk.sl.cgservice.entity.SDelivery;
+ import com.zyxk.sl.cgservice.vo.UserProfile;
++import com.zyxk.sl.cgservice.vo.VoSupplierAssess;
+ 
+ import java.io.File;
+ import java.io.IOException;
+@@ -28,4 +29,5 @@
+ 
+     void exportDeliveryDetail(List<SDelivery> deliveryList, OutputStream os, String[] supplierNameList);
+ 
++     void exportSupplierAssess(List<VoSupplierAssess> list, OutputStream os);
+ }
+
+Property changes on: biz/inventory/com.zyxk.sl.cgservice/src/main/java/com/zyxk/sl/cgservice/service/IExcelService.java
+___________________________________________________________________
+Modified: svn:mergeinfo
+   Merged /branches/DEV/02_Codes/shr-parent/biz/inventory/com.zyxk.sl.cgservice/src/main/java/com/zyxk/sl/cgservice/service/IExcelService.java:r8548-8565
+Index: biz/inventory/com.zyxk.sl.cgservice/src/main/java/com/zyxk/sl/cgservice/service/ISSupplierService.java
+===================================================================
+--- biz/inventory/com.zyxk.sl.cgservice/src/main/java/com/zyxk/sl/cgservice/service/ISSupplierService.java	(revision 8661)
++++ biz/inventory/com.zyxk.sl.cgservice/src/main/java/com/zyxk/sl/cgservice/service/ISSupplierService.java	(revision 8749)
+@@ -1,11 +1,13 @@
+ package com.zyxk.sl.cgservice.service;
+ 
+ import com.github.pagehelper.Page;
++import com.zyxk.sl.cgservice.dto.DtoSupplierAssess;
+ import com.zyxk.sl.cgservice.dto.DtoSupplierSearch;
+ import com.zyxk.sl.cgservice.entity.SSupplier;
+ import com.zyxk.sl.cgservice.exception.BizException;
+ import com.zyxk.sl.cgservice.vo.UserProfile;
+ import com.zyxk.sl.cgservice.vo.VoFailInfo;
++import com.zyxk.sl.cgservice.vo.VoSupplierAssess;
+ import org.springframework.web.bind.MethodArgumentNotValidException;
+ 
+ import java.io.InputStream;
+@@ -117,4 +119,9 @@
+     List<SSupplier> findByIds(String[] supplierIds) throws BizException;
+ 
+     Page<SSupplier> findPagedPurchaseBargainingSuppliers(DtoSupplierSearch condition) throws BizException;
++
++    Page<VoSupplierAssess>getSupplierGradeInfo(DtoSupplierSearch condition);
++
++    void saveOrUpdateSupplierAssess(DtoSupplierAssess supplierAssess);
++    void exportSupplierAssess(DtoSupplierSearch condition, OutputStream os)throws BizException;
+ }
+Index: biz/inventory/com.zyxk.sl.cgservice/src/main/java/com/zyxk/sl/cgservice/service/impl/SSupplierServiceImpl.java
+===================================================================
+--- biz/inventory/com.zyxk.sl.cgservice/src/main/java/com/zyxk/sl/cgservice/service/impl/SSupplierServiceImpl.java	(revision 8661)
++++ biz/inventory/com.zyxk.sl.cgservice/src/main/java/com/zyxk/sl/cgservice/service/impl/SSupplierServiceImpl.java	(revision 8749)
+@@ -3,6 +3,7 @@
+ import com.alibaba.fastjson.JSONObject;
+ import com.github.pagehelper.Page;
+ import com.github.pagehelper.PageHelper;
++import com.zyxk.sl.cgservice.dto.DtoSupplierAssess;
+ import com.zyxk.sl.cgservice.dto.DtoSupplierSearch;
+ import com.zyxk.sl.cgservice.entity.SDictionary;
+ import com.zyxk.sl.cgservice.entity.SSupplier;
+@@ -22,6 +23,7 @@
+ import com.zyxk.sl.cgservice.util.StringUtil;
+ import com.zyxk.sl.cgservice.vo.UserProfile;
+ import com.zyxk.sl.cgservice.vo.VoFailInfo;
++import com.zyxk.sl.cgservice.vo.VoSupplierAssess;
+ import org.apache.commons.collections4.ListUtils;
+ import org.apache.commons.lang3.StringUtils;
+ import org.slf4j.Logger;
+@@ -465,4 +467,33 @@
+         }
+         return supplierMapper.selectPagedPurchaseBargainingResults(condition);
+     }
++
++    @Override
++    public Page<VoSupplierAssess> getSupplierGradeInfo(DtoSupplierSearch condition) {
++        Page<VoSupplierAssess>  page = PageHelper.startPage(condition.getPageNow(), condition.getPageSize()).doSelectPage(
++                () -> supplierMapper.getSupplierGradeInfo(condition));
++        return page;
++    }
++
++    @Override
++    public void saveOrUpdateSupplierAssess(DtoSupplierAssess supplierAssess) {
++        Date nowDate =new Date();
++        supplierAssess.setCreateTime(nowDate);
++        supplierAssess.setLastModifyTime(nowDate);
++        if(StringUtils.isBlank(supplierAssess.getRemark())){
++            supplierAssess.setRemark("");
++        }
++        if(StringUtils.isBlank(supplierAssess.getSupplierAssessId())){
++            supplierAssess.setSupplierAssessId(StringUtil.uuid());
++            supplierMapper.insertSupplierAssess(supplierAssess);
++        }else{
++            supplierMapper.updateSupplierAssess(supplierAssess);
++        }
++    }
++
++    @Override
++    public void exportSupplierAssess(DtoSupplierSearch condition, OutputStream os) throws BizException {
++        List<VoSupplierAssess> list = supplierMapper.getSupplierGradeInfo(condition);
++        excelService.exportSupplierAssess(list, os);
++    }
+ }
+Index: biz/inventory/com.zyxk.sl.cgservice/src/main/java/com/zyxk/sl/cgservice/service/impl/DefaultExcelServiceImpl.java
+===================================================================
+--- biz/inventory/com.zyxk.sl.cgservice/src/main/java/com/zyxk/sl/cgservice/service/impl/DefaultExcelServiceImpl.java	(revision 8661)
++++ biz/inventory/com.zyxk.sl.cgservice/src/main/java/com/zyxk/sl/cgservice/service/impl/DefaultExcelServiceImpl.java	(revision 8749)
+@@ -16,6 +16,7 @@
+ import com.zyxk.sl.cgservice.vo.UserProfile;
+ import com.zyxk.sl.cgservice.vo.VoDynamicDelivery;
+ import com.zyxk.sl.cgservice.vo.VoFailInfo;
++import com.zyxk.sl.cgservice.vo.VoSupplierAssess;
+ import org.apache.commons.lang.StringUtils;
+ import org.apache.poi.hssf.usermodel.*;
+ import org.apache.poi.hssf.util.HSSFColor;
+@@ -1189,4 +1190,81 @@
+             }
+         }
+     }
++    @Override
++    public void exportSupplierAssess(List<VoSupplierAssess> list,OutputStream os){
++        HSSFWorkbook workbook = new HSSFWorkbook();
++        String[] columnHeaders = {"供应商名称", "评价等级", "备注"};
++        HSSFCellStyle headerStyle = getHSSFCellStyle(workbook, HorizontalAlignment.CENTER, true, 12, true);
++        headerStyle.setWrapText(true);
++        HSSFSheet sheet = workbook.createSheet("sheet1");
++        HSSFRow row = sheet.createRow(0);
++        for (int i = 0; i < columnHeaders.length; i++) {
++            HSSFCell cell = row.createCell(i);
++            cell.setCellStyle(headerStyle);
++            cell.setCellValue(columnHeaders[i]);
++        }
++        HSSFCellStyle style = getHSSFCellStyle(workbook, HorizontalAlignment.LEFT, false, 10, true);
++        style.setWrapText(true);
++        HSSFCellStyle style2 = getHSSFCellStyle(workbook, HorizontalAlignment.LEFT, false, 10, true,HSSFColor.HSSFColorPredefined.ORANGE.getIndex());
++        style2.setWrapText(true);
++        for (int i = 1; i <= list.size(); i++) {
++            HSSFRow row2 = sheet.createRow(i);
++            VoSupplierAssess assess =list.get(i-1);
++            HSSFCell cell0 = row2.createCell(0);
++            cell0.setCellValue(assess.getSupplierName());
++            StringBuffer grade =new StringBuffer("");
++            if(assess.getGrade()!= null && assess.getGrade()>0){
++                for (int j = 0; j < assess.getGrade(); j++) {
++                    grade.append("★");
++                }
++            }
++            HSSFCell cell1 = row2.createCell(1);
++            cell1.setCellValue(grade.toString());
++            HSSFCell cell2 = row2.createCell(2);
++            cell2.setCellValue(StringUtils.isBlank(assess.getRemark())?"":assess.getRemark());
++            cell0.setCellStyle(style);
++            cell1.setCellStyle(style2);
++            cell2.setCellStyle(style);
++        }
++        sheet.setColumnWidth(0, 256 * 25);
++        sheet.setColumnWidth(1, 256 * 20);
++        sheet.setColumnWidth(2, 256 * 42);
++        try {
++            workbook.write(os);
++            os.flush();
++        } catch (IOException e) {
++            e.printStackTrace();
++            throw new BizRuntimeException("导出失败！");
++        } finally {
++            if (workbook != null) {
++                try {
++                    workbook.close();
++                } catch (IOException e) {
++                    e.printStackTrace();
++                }
++            }
++        }
++    }
++    private HSSFCellStyle getHSSFCellStyle(HSSFWorkbook workbook,HorizontalAlignment horizontalAlignment,
++                                           boolean bold,int fontSize,boolean border,short color ){
++        HSSFCellStyle cellStyle = workbook.createCellStyle();
++        cellStyle.setAlignment(horizontalAlignment);
++        cellStyle.setVerticalAlignment(VerticalAlignment.CENTER);
++
++        HSSFFont font = workbook.createFont();
++        font.setFontName("宋体");
++        font.setBold(bold);
++        font.setColor(color);//设置excel数据字体颜色
++        font.setFontHeightInPoints((short) fontSize);
++        cellStyle.setFont(font);
++
++        if (border) {
++            cellStyle.setBorderTop(BorderStyle.THIN);
++            cellStyle.setBorderBottom(BorderStyle.THIN);
++            cellStyle.setBorderLeft(BorderStyle.THIN);
++            cellStyle.setBorderRight(BorderStyle.THIN);
++        }
++
++        return cellStyle;
++    }
+ }
+
+Property changes on: biz/inventory/com.zyxk.sl.cgservice/src/main/java/com/zyxk/sl/cgservice/service/impl/DefaultExcelServiceImpl.java
+___________________________________________________________________
+Modified: svn:mergeinfo
+   Merged /branches/DEV/02_Codes/shr-parent/biz/inventory/com.zyxk.sl.cgservice/src/main/java/com/zyxk/sl/cgservice/service/impl/DefaultExcelServiceImpl.java:r8548-8565
+Index: biz/inventory/com.zyxk.sl.cgservice/src/main/java/com/zyxk/sl/cgservice/ctrl/SSupplierController.java
+===================================================================
+--- biz/inventory/com.zyxk.sl.cgservice/src/main/java/com/zyxk/sl/cgservice/ctrl/SSupplierController.java	(revision 8661)
++++ biz/inventory/com.zyxk.sl.cgservice/src/main/java/com/zyxk/sl/cgservice/ctrl/SSupplierController.java	(revision 8749)
+@@ -9,7 +9,9 @@
+ import com.zyxk.sl.cgservice.util.StringUtil;
+ import com.zyxk.sl.cgservice.vo.UserProfile;
+ import com.zyxk.sl.cgservice.vo.VoFailInfo;
++import com.zyxk.sl.cgservice.vo.VoSupplierAssess;
+ import com.zyxk.sl.cgservice.vo.VoSupplierForMany;
++import org.apache.commons.lang.StringUtils;
+ import org.slf4j.Logger;
+ import org.slf4j.LoggerFactory;
+ import org.springframework.beans.factory.annotation.Autowired;
+@@ -47,7 +49,7 @@
+      * @return
+      */
+     @ResponseBody
+-    @RequestMapping(value = Constant.URL_LIST, name = "com.zyxk.sl.cgservice",consumes = "application/json")
++    @RequestMapping(value = Constant.URL_LIST, name = "com.zyxk.sl.cgservice", consumes = "application/json")
+     public Pager getSupplierList(@RequestBody DtoSupplierSearch condition) throws BizException {
+ 
+         logger.info("=================getSupplierList======================");
+@@ -68,7 +70,7 @@
+     }
+ 
+     @ResponseBody
+-    @RequestMapping(value = "/next/code/"+ Constant.URL_READ)
++    @RequestMapping(value = "/next/code/" + Constant.URL_READ)
+     public DtoResult findNextCode() throws Exception {
+         DtoResult result = new DtoResult();
+         result.setResult(supplierService.findNextSupplierCode(getUserProfile()));
+@@ -222,7 +224,7 @@
+         return result;
+     }
+ 
+-    @RequestMapping(value = "find/by/name"+ Constant.URL_READ,consumes = "application/json")
++    @RequestMapping(value = "find/by/name" + Constant.URL_READ, consumes = "application/json")
+     public DtoResult findSupplierByName(@RequestBody DtoSupplierSearch condition) throws BizException {
+         DtoResult result = new DtoResult();
+         SSupplier supplier = supplierService.findByName(condition.getSupplierName(), getUserProfile());
+@@ -231,8 +233,8 @@
+     }
+ 
+     @ResponseBody
+-    @PostMapping(value = "find/by/ids" +Constant.URL_LIST,consumes = "application/json")
+-    public DtoResult importSupplier(@RequestBody DtoPrimaryKeys key) throws BizException{
++    @PostMapping(value = "find/by/ids" + Constant.URL_LIST, consumes = "application/json")
++    public DtoResult importSupplier(@RequestBody DtoPrimaryKeys key) throws BizException {
+         DtoResult result = new DtoResult();
+         List<SSupplier> list = supplierService.findByIds(key.getId());
+         result.setResult(list);
+@@ -259,4 +261,68 @@
+         pager.setResult(suppliers);
+         return pager;
+     }
++
++
++    /**
++     * 查询供应商评价列表
++     *
++     * @return
++     */
++    @ResponseBody
++    @PostMapping(value = "assess" + Constant.URL_LIST, consumes = "application/json")
++    public Pager getSupplierAssessList(@RequestBody DtoSupplierSearch condition) throws BizException {
++        Pager pager = new Pager();
++        UserProfile profile = getUserProfile();
++        if (condition.getPageNow() == null || condition.getPageSize() == null) {
++            condition.setPageNow(1);
++        }
++        if (condition.getPageSize() == null) {
++            condition.setPageSize(Integer.MAX_VALUE);
++        }
++        condition.setTenant(profile.getTenantId());
++        Page<VoSupplierAssess> page = supplierService.getSupplierGradeInfo(condition);
++        pager.setPageNow(page.getPageNum());
++        pager.setPageSize(page.getPageSize());
++        pager.setTotal(page.getTotal());
++        pager.setResult(page.getResult());
++        return pager;
++    }
++
++    /**
++     * 修改供应商评价
++     *
++     * @param supplierAssess
++     * @return
++     */
++    @ResponseBody
++    @PostMapping(value = "assess" + Constant.URL_UPDATE, consumes = "application/json")
++    public DtoResult saveOrUpdateSupplierAssess(@RequestBody @Valid DtoSupplierAssess supplierAssess) {
++        DtoResult result = new DtoResult();
++        UserProfile profile = getUserProfile();
++        supplierAssess.setCreateUser(profile.getUserId());
++        supplierAssess.setLastModifyUser(profile.getUserId());
++        supplierService.saveOrUpdateSupplierAssess(supplierAssess);
++        result.setResult("保存成功");
++        return result;
++    }
++
++    @RequestMapping(value = "assess" + Constant.URL_EXPORT)
++    public void exportSupplierAssess(DtoSupplierSearch condition, HttpServletResponse resp) throws BizException {
++        condition.setPageNow(1);
++        condition.setPageSize(Integer.MAX_VALUE);
++        UserProfile profile = getUserProfile();
++        condition.setTenant(profile.getTenantId());
++        OutputStream os;
++        try {
++            resp.setContentType("application/vnd.ms-excel");
++            resp.addHeader("Content-Disposition", attachment("供货商评级考核"));
++            os = resp.getOutputStream();
++        } catch (IOException e) {
++            e.printStackTrace();
++            resp.setContentType("application/json");
++            throw new BizException("导出供应商失败");
++        }
++        supplierService.exportSupplierAssess(condition, os);
++    }
++
+ }
+Index: biz/inventory/com.zyxk.sl.cgservice/src/main/java/com/zyxk/sl/cgservice/ctrl
+===================================================================
+--- biz/inventory/com.zyxk.sl.cgservice/src/main/java/com/zyxk/sl/cgservice/ctrl	(revision 8661)
++++ biz/inventory/com.zyxk.sl.cgservice/src/main/java/com/zyxk/sl/cgservice/ctrl	(revision 8749)
+
+Property changes on: biz/inventory/com.zyxk.sl.cgservice/src/main/java/com/zyxk/sl/cgservice/ctrl
+___________________________________________________________________
+Modified: svn:mergeinfo
+   Merged /branches/DEV/02_Codes/shr-parent/biz/inventory/com.zyxk.sl.cgservice/src/main/java/com/zyxk/sl/cgservice/ctrl:r8548-8565
+Index: biz/inventory/com.zyxk.sl.cgservice/src/main/java/com/zyxk/sl/cgservice/mapper/SSupplierMapper.java
+===================================================================
+--- biz/inventory/com.zyxk.sl.cgservice/src/main/java/com/zyxk/sl/cgservice/mapper/SSupplierMapper.java	(revision 8661)
++++ biz/inventory/com.zyxk.sl.cgservice/src/main/java/com/zyxk/sl/cgservice/mapper/SSupplierMapper.java	(revision 8749)
+@@ -1,9 +1,11 @@
+ package com.zyxk.sl.cgservice.mapper;
+ 
+ import com.github.pagehelper.Page;
++import com.zyxk.sl.cgservice.dto.DtoSupplierAssess;
+ import com.zyxk.sl.cgservice.dto.DtoSupplierSearch;
+ import com.zyxk.sl.cgservice.entity.SSupplier;
+ import com.zyxk.sl.cgservice.entity.SSupplierCategoryRelation;
++import com.zyxk.sl.cgservice.vo.VoSupplierAssess;
+ import org.apache.ibatis.annotations.Param;
+ 
+ import java.util.List;
+@@ -39,4 +41,8 @@
+     String selectName(@Param("userId") String userId);
+ 
+     Page<SSupplier> selectPagedPurchaseBargainingResults(DtoSupplierSearch condition);
++
++    List<VoSupplierAssess>getSupplierGradeInfo(DtoSupplierSearch condition);
++    int insertSupplierAssess(DtoSupplierAssess supplierAssess);
++    int updateSupplierAssess(DtoSupplierAssess supplierAssess);
+ }
+Index: biz/inventory/com.zyxk.sl.cgservice/src/main/java/com/zyxk/sl/cgservice/vo/VoSupplierAssess.java
+===================================================================
+--- biz/inventory/com.zyxk.sl.cgservice/src/main/java/com/zyxk/sl/cgservice/vo/VoSupplierAssess.java	(revision 0)
++++ biz/inventory/com.zyxk.sl.cgservice/src/main/java/com/zyxk/sl/cgservice/vo/VoSupplierAssess.java	(revision 8749)
+@@ -0,0 +1,23 @@
++package com.zyxk.sl.cgservice.vo;
++
++import lombok.Data;
++
++/**
++ * @description: 供应商评价
++ * @author: lyz
++ * @date: 2022/04/15  8:32
++ */
++@Data
++public class VoSupplierAssess {
++
++    private String supplierAssessId;
++
++    private String supplierId;
++
++    private String supplierName;
++
++    private Integer grade;
++
++    private String remark;
++
++}
+Index: biz/inventory/com.zyxk.sl.cgservice/src/main/java/com/zyxk/sl/cgservice/vo
+===================================================================
+--- biz/inventory/com.zyxk.sl.cgservice/src/main/java/com/zyxk/sl/cgservice/vo	(revision 8661)
++++ biz/inventory/com.zyxk.sl.cgservice/src/main/java/com/zyxk/sl/cgservice/vo	(revision 8749)
+
+Property changes on: biz/inventory/com.zyxk.sl.cgservice/src/main/java/com/zyxk/sl/cgservice/vo
+___________________________________________________________________
+Modified: svn:mergeinfo
+   Merged /branches/DEV/02_Codes/shr-parent/biz/inventory/com.zyxk.sl.cgservice/src/main/java/com/zyxk/sl/cgservice/vo:r8548-8565
+Index: biz/inventory/com.zyxk.sl.cgservice/src/main/java/com/zyxk/sl/cgservice/dto/DtoSupplierAssess.java
+===================================================================
+--- biz/inventory/com.zyxk.sl.cgservice/src/main/java/com/zyxk/sl/cgservice/dto/DtoSupplierAssess.java	(revision 0)
++++ biz/inventory/com.zyxk.sl.cgservice/src/main/java/com/zyxk/sl/cgservice/dto/DtoSupplierAssess.java	(revision 8749)
+@@ -0,0 +1,24 @@
++package com.zyxk.sl.cgservice.dto;
++
++import com.zyxk.sl.cgservice.entity.BaseEntity;
++import lombok.Data;
++
++import javax.validation.constraints.NotBlank;
++
++/**
++ * @description:
++ * @author: lyz
++ * @date: 2022/04/15  9:08
++ */
++@Data
++public class DtoSupplierAssess  extends BaseEntity {
++
++    private String supplierAssessId;
++
++    @NotBlank(message = "供应商id不能为空")
++    private String supplierId;
++
++    private Integer grade =0;
++
++    private String remark;
++}
+Index: biz/inventory/com.zyxk.sl.cgservice/src/main/java/com/zyxk/sl/cgservice/dto
+===================================================================
+--- biz/inventory/com.zyxk.sl.cgservice/src/main/java/com/zyxk/sl/cgservice/dto	(revision 8661)
++++ biz/inventory/com.zyxk.sl.cgservice/src/main/java/com/zyxk/sl/cgservice/dto	(revision 8749)
+
+Property changes on: biz/inventory/com.zyxk.sl.cgservice/src/main/java/com/zyxk/sl/cgservice/dto
+___________________________________________________________________
+Modified: svn:mergeinfo
+   Merged /branches/DEV/02_Codes/shr-parent/biz/inventory/com.zyxk.sl.cgservice/src/main/java/com/zyxk/sl/cgservice/dto:r8548-8565
+Index: biz/inventory/com.zyxk.sl.kcglservice/src/main/java/com/zyxk/sl/kcglservice/service/impl/SStockCountServiceImpl.java
+===================================================================
+--- biz/inventory/com.zyxk.sl.kcglservice/src/main/java/com/zyxk/sl/kcglservice/service/impl/SStockCountServiceImpl.java	(revision 8661)
++++ biz/inventory/com.zyxk.sl.kcglservice/src/main/java/com/zyxk/sl/kcglservice/service/impl/SStockCountServiceImpl.java	(revision 8749)
+@@ -15,6 +15,7 @@
+ import com.zyxk.sl.kcglservice.entity.*;
+ import com.zyxk.sl.kcglservice.mapper.*;
+ import com.zyxk.sl.kcglservice.service.*;
++import com.zyxk.sl.kcglservice.util.BigDecimalUtil;
+ import com.zyxk.sl.kcglservice.util.StringUtil;
+ import com.zyxk.sl.kcglservice.vo.*;
+ import com.zyxk.sl.kcglservice.entity.*;
+@@ -287,10 +288,15 @@
+         Double outStockMoney = 0D;
+         List<SSupplierInStockCount> list = stockCountMapper.selectTotalCategoryMoney(condition, orgId);
+         if (list != null && list.size() > 0) {
+-            totalMoney = list.stream().mapToDouble(SSupplierInStockCount::getMoney).sum();
+-            refundMoney = list.stream().mapToDouble(SSupplierInStockCount::getRefundMoney).sum();
+-            outStockMoney = list.stream().mapToDouble(SSupplierInStockCount::getOutStockMoney).sum();
++            for (SSupplierInStockCount inStockCount : list) {
++                totalMoney = BigDecimalUtil.sumNoParse(totalMoney,inStockCount.getMoney());
++                refundMoney = BigDecimalUtil.sumNoParse(totalMoney,inStockCount.getRefundMoney());
++                outStockMoney = BigDecimalUtil.sumNoParse(totalMoney,inStockCount.getOutStockMoney());
+         }
++//            totalMoney = list.stream().mapToDouble(SSupplierInStockCount::getMoney).sum();
++//            refundMoney = list.stream().mapToDouble(SSupplierInStockCount::getRefundMoney).sum();
++//            outStockMoney = list.stream().mapToDouble(SSupplierInStockCount::getOutStockMoney).sum();
++        }
+ 
+         DtoListWithTotal dtoListWithTotal = new DtoListWithTotal();
+ //        dtoListWithTotal.setTotalMoney(Double.valueOf(String.format("%.2f", totalMoney)));
+@@ -324,6 +330,12 @@
+         }
+ 
+         Page<SSupplierOrgInStockCount> page = stockCountMapper.selectOrgCategoryMoney(condition, orgId);
++        DecimalFormat decimalFormat = getFormat(condition);
++        for (SSupplierOrgInStockCount count : page) {
++            count.setMoneyStr(decimalFormat.format(count.getMoney()));
++            count.setRefundMoneyStr(decimalFormat.format(count.getRefundMoney()));
++            count.setOutStockMoneyStr(decimalFormat.format(count.getOutStockMoney()));
++        }
+ 
+         Double totalMoney = 0.0;
+         Double refundMoney = 0.0;
+@@ -330,15 +342,23 @@
+         Double outStockMoney = 0D;
+         List<SSupplierOrgInStockCount> list = stockCountMapper.selectTotalOrgCategoryMoney(condition, orgId);
+         if (list != null && list.size() > 0) {
+-            totalMoney = list.stream().mapToDouble(SSupplierOrgInStockCount::getMoney).sum();
+-            refundMoney = list.stream().mapToDouble(SSupplierOrgInStockCount::getRefundMoney).sum();
+-            outStockMoney = list.stream().mapToDouble(SSupplierOrgInStockCount::getOutStockMoney).sum();
++            for (SSupplierOrgInStockCount inStockCount : list) {
++                totalMoney = BigDecimalUtil.sumNoParse(totalMoney,inStockCount.getMoney());
++                refundMoney = BigDecimalUtil.sumNoParse(refundMoney,inStockCount.getRefundMoney());
++                outStockMoney = BigDecimalUtil.sumNoParse(outStockMoney,inStockCount.getOutStockMoney());
+         }
++//            totalMoney = list.stream().mapToDouble(SSupplierOrgInStockCount::getMoney).sum();
++//            refundMoney = list.stream().mapToDouble(SSupplierOrgInStockCount::getRefundMoney).sum();
++//            outStockMoney = list.stream().mapToDouble(SSupplierOrgInStockCount::getOutStockMoney).sum();
++        }
+ 
+         DtoListWithTotal dtoListWithTotal = new DtoListWithTotal();
+-        dtoListWithTotal.setTotalMoney(Double.valueOf(String.format("%.2f", totalMoney)));
+-        dtoListWithTotal.setRefundMoney(Double.valueOf(String.format("%.2f", refundMoney)));
+-        dtoListWithTotal.setOutStockMoney(Double.valueOf(String.format("%.2f", outStockMoney)));
++//        dtoListWithTotal.setTotalMoney(Double.valueOf(String.format("%.2f", totalMoney)));
++//        dtoListWithTotal.setRefundMoney(Double.valueOf(String.format("%.2f", refundMoney)));
++//        dtoListWithTotal.setOutStockMoney(Double.valueOf(String.format("%.2f", outStockMoney)));
++        dtoListWithTotal.setTotalMoney(totalMoney);
++        dtoListWithTotal.setRefundMoney(refundMoney);
++        dtoListWithTotal.setOutStockMoney(outStockMoney);
+         dtoListWithTotal.setResult(page);
+         dtoListWithTotal.setPageNow(page.getPageNum());
+         dtoListWithTotal.setPageSize(page.getPageSize());
+@@ -1483,7 +1503,7 @@
+         }
+         Date startCreateTime = condition.getStartCreateTime();
+         Date endCreateTime = condition.getEndCreateTime();
+-        Double totalMoney = list.getTotalMoney() - list.getRefundMoney();
++        Double totalMoney = (new BigDecimal(list.getTotalMoney()).subtract(new BigDecimal(list.getRefundMoney()))).doubleValue();
+         String orgName = userMapper.selectOrgName(profile.getOrgId());
+         Map<String, Object> map = new HashMap<>();
+         map.put("organization", orgName);
+
+Property changes on: biz/inventory/com.zyxk.sl.kcglservice/src/main/java/com/zyxk/sl/kcglservice/service/impl/SStockCountServiceImpl.java
+___________________________________________________________________
+Modified: svn:mergeinfo
+   Merged /branches/DEV/02_Codes/shr-parent/biz/inventory/com.zyxk.sl.kcglservice/src/main/java/com/zyxk/sl/kcglservice/service/impl/SStockCountServiceImpl.java:r8677-8686,8688-8693
+Index: biz/inventory/com.zyxk.sl.kcglservice/src/main/java/com/zyxk/sl/kcglservice/service/impl/StockReportServiceImpl.java
+===================================================================
+--- biz/inventory/com.zyxk.sl.kcglservice/src/main/java/com/zyxk/sl/kcglservice/service/impl/StockReportServiceImpl.java	(revision 8661)
++++ biz/inventory/com.zyxk.sl.kcglservice/src/main/java/com/zyxk/sl/kcglservice/service/impl/StockReportServiceImpl.java	(revision 8749)
+@@ -1012,7 +1012,7 @@
+         Double money=0.0;
+         SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
+         for(VoInStockOfMonthSummary summary:list){
+-            money=money+summary.getAmountOfMoney();
++            money= BigDecimalUtil.sumNoParse(money,summary.getAmountOfMoney());
+             String date = format.format(summary.getBillDate());
+             summary.setDate(date);
+         }
+@@ -1034,7 +1034,7 @@
+         List<VoInStockOfMonthSummary> list=(List<VoInStockOfMonthSummary>) total.getResult();
+         if(list != null && list.size() >0){
+             for(VoInStockOfMonthSummary e : list){
+-                totalMoney += e.getAmountOfMoney();
++                totalMoney = BigDecimalUtil.sumNoParse(totalMoney,e.getAmountOfMoney());
+             }
+         }
+         map.put("details",list);
+
+Property changes on: biz/inventory/com.zyxk.sl.kcglservice/src/main/java/com/zyxk/sl/kcglservice/service/impl/StockReportServiceImpl.java
+___________________________________________________________________
+Modified: svn:mergeinfo
+   Merged /branches/DEV/02_Codes/shr-parent/biz/inventory/com.zyxk.sl.kcglservice/src/main/java/com/zyxk/sl/kcglservice/service/impl/StockReportServiceImpl.java:r8677-8686
+Index: biz/inventory/com.zyxk.sl.kcglservice/src/main/java/com/zyxk/sl/kcglservice/service/impl/SStockTransferServiceImpl.java
+===================================================================
+--- biz/inventory/com.zyxk.sl.kcglservice/src/main/java/com/zyxk/sl/kcglservice/service/impl/SStockTransferServiceImpl.java	(revision 8661)
++++ biz/inventory/com.zyxk.sl.kcglservice/src/main/java/com/zyxk/sl/kcglservice/service/impl/SStockTransferServiceImpl.java	(revision 8749)
+@@ -41,10 +41,13 @@
+ 
+ import java.io.OutputStream;
+ import java.math.BigDecimal;
++import java.text.DecimalFormat;
+ import java.text.SimpleDateFormat;
+ import java.util.*;
+ import java.util.stream.Collectors;
+ 
++import static com.zyxk.sl.kcglservice.util.StringUtil.deciamlFormat;
++
+ /**
+  * 调拨单业务实现类
+  *
+@@ -61,6 +64,8 @@
+ 
+ 	@Autowired
+ 	private SInStockDetailMapper inStockDetailMapper;
++	@Autowired
++	private ISysAdminClientService sysAdminClientService;
+ 
+ 	@Autowired
+ 	private SStockTransferDetailMapper stockTransferDetailMapper;
+@@ -933,11 +938,27 @@
+ 		return list;
+ 	}
+ 
++	private DecimalFormat getFormat(SStockTransfer condition){
++		Integer priceMinDigits = null;
++		if (condition.getPriceMinDigits() == null) {
++			try {
++				priceMinDigits = sysAdminClientService.getTenantPriceMinDigits();
++				condition.setPriceMinDigits(priceMinDigits);
++			} catch (BizException e) {
++				e.printStackTrace();
++			}
++		} else {
++			priceMinDigits = condition.getPriceMinDigits();
++		}
++		return new DecimalFormat(deciamlFormat(priceMinDigits));
++	}
++
+ 	@Transactional
+ 	@Override
+ 	public void printStockTransfer(String stockTransferId, FileType fileType, OutputStream os, String organization)
+ 			throws BizException {
+ 		SStockTransfer stockTransfer = findStockTransfer(stockTransferId);
++		DecimalFormat decimalFormat = getFormat(stockTransfer);
+ 		List<SStockTransferDetail> stockTransferDetails = null;
+ 
+ 		Map<String, Object> map = new HashMap<>();
+@@ -980,10 +1001,10 @@
+ 					item.put("inventoryCode", stockTransferDetail.getInventoryCode());
+ 					item.put("inventoryUnit", stockTransferDetail.getInventoryUnit());
+ 					item.put("inventoryModel", stockTransferDetail.getInventoryModel());
+-					item.put("inventoryUnitPrice", stockTransferDetail.getInventoryUnitPrice());
++					item.put("inventoryUnitPrice", decimalFormat.format(stockTransferDetail.getInventoryUnitPrice()));
+ 					item.put("inventoryCount", stockTransferDetail.getInventoryCount());
+ 					item.put("batch", stockTransferDetail.getBatch());
+-					item.put("inventoryMoney", stockTransferDetail.getInventoryMoney());
++					item.put("inventoryMoney", decimalFormat.format(stockTransferDetail.getInventoryMoney()));
+ 					item.put("supplierName", stockTransferDetail.getSupplierName());
+ 					item.put("categoryName",stockTransferDetail.getCategoryName());
+ 
+@@ -1003,7 +1024,7 @@
+ 				total.put("inventoryModel", " ");
+ 				total.put("inventoryUnitPrice", null);
+ 				total.put("inventoryCount", totalCount);
+-				total.put("inventoryMoney", totalMoney);
++				total.put("inventoryMoney", decimalFormat.format(totalMoney));
+ 				total.put("categoryName"," ");
+ 				list.add(total);
+ 
+@@ -1011,8 +1032,9 @@
+ 
+ 				stockTransfer.setCurrentOrganizationName(currentOrganizationName);
+ 				stockTransfer.setTotalMoney(totalMoney);
+-
++				stockTransfer.setTotalMoneyStr(decimalFormat.format(totalMoney));
+ 				map.put("totalMoney", stockTransfer.getTotalMoney());
++				map.put("totalMoneyStr",stockTransfer.getTotalMoneyStr());
+ 				reportClientService.print(Constant.RT_STOCK_TRANSFER, fileType, GsonUtil.toJson(map), os);
+ 			} else {
+ 				double totalMoney = 0;
+@@ -1020,6 +1042,7 @@
+ 
+ 				stockTransfer.setCurrentOrganizationName(currentOrganizationName);
+ 				stockTransfer.setTotalMoney(totalMoney);
++				stockTransfer.setTotalMoneyStr(decimalFormat.format(totalMoney));
+ 				reportClientService.print(Constant.RT_STOCK_TRANSFER, fileType, GsonUtil.toJson(stockTransfer), os);
+ 			}
+ 		} else {
+
+Property changes on: biz/inventory/com.zyxk.sl.kcglservice/src/main/java/com/zyxk/sl/kcglservice/service/impl/SStockTransferServiceImpl.java
+___________________________________________________________________
+Modified: svn:mergeinfo
+   Merged /branches/DEV/02_Codes/shr-parent/biz/inventory/com.zyxk.sl.kcglservice/src/main/java/com/zyxk/sl/kcglservice/service/impl/SStockTransferServiceImpl.java:r8548-8565
+Index: biz/inventory/com.zyxk.sl.kcglservice/src/main/java/com/zyxk/sl/kcglservice/service/impl/SStockTraceServiceImpl.java
+===================================================================
+--- biz/inventory/com.zyxk.sl.kcglservice/src/main/java/com/zyxk/sl/kcglservice/service/impl/SStockTraceServiceImpl.java	(revision 8661)
++++ biz/inventory/com.zyxk.sl.kcglservice/src/main/java/com/zyxk/sl/kcglservice/service/impl/SStockTraceServiceImpl.java	(revision 8749)
+@@ -10,6 +10,7 @@
+ import com.zyxk.sl.kcglservice.exception.BizRuntimeException;
+ import com.zyxk.sl.kcglservice.mapper.*;
+ import com.zyxk.sl.kcglservice.service.*;
++import com.zyxk.sl.kcglservice.util.BigDecimalUtil;
+ import com.zyxk.sl.kcglservice.util.DateUtil;
+ import com.zyxk.sl.kcglservice.util.GsonUtil;
+ import com.zyxk.sl.kcglservice.util.StringUtil;
+@@ -138,7 +139,7 @@
+             if(quantity==0)
+                 e.setUnitPrice(0D);
+             else
+-                e.setUnitPrice(Double.valueOf(decimalFormat.format(amountOfMoney/quantity)));
++                e.setUnitPrice(Double.valueOf(decimalFormat.format(BigDecimalUtil.divide(amountOfMoney,quantity))));
+         });
+         return stockTraces;
+     }
+@@ -281,9 +282,13 @@
+                         processInventoryStockTrace(stockTrace,inventory);
+                     }
+                     double beforeInStockQuantity = beforeStockTraces.stream().mapToDouble(VoInventoryStockTrace::getInStockQuantity).sum();
+-                    double beforeInStockMoney = beforeStockTraces.stream().mapToDouble(VoInventoryStockTrace::getInStockMoney).sum();
++                    double beforeInStockMoney = 0d;
+                     double beforeOutStockQuantity = beforeStockTraces.stream().mapToDouble(VoInventoryStockTrace::getOutStockQuantity).sum();
+-                    double beforeOutStockMoney = beforeStockTraces.stream().mapToDouble(VoInventoryStockTrace::getOutStockMoney).sum();
++                    double beforeOutStockMoney = 0d;
++                    for (VoInventoryStockTrace stockTrace : beforeStockTraces) {
++                        beforeInStockMoney = BigDecimalUtil.sumNoParse(beforeInStockMoney,stockTrace.getInStockMoney());
++                        beforeOutStockMoney = BigDecimalUtil.sumNoParse(beforeOutStockMoney,stockTrace.getOutStockMoney());
++                    }
+                     VoInventoryStockTrace stockTrace = new VoInventoryStockTrace();
+                     stockTrace.setWarehouse("历史合计");
+                     stockTrace.setInStockQuantity(beforeInStockQuantity);
+@@ -291,7 +296,7 @@
+                     stockTrace.setOutStockQuantity(beforeOutStockQuantity);
+                     stockTrace.setOutStockMoney(beforeOutStockMoney);
+                     stockTrace.setEndQuantity(beforeInStockQuantity-beforeOutStockQuantity);
+-                    stockTrace.setEndMoney(beforeInStockMoney-beforeOutStockMoney);
++                    stockTrace.setEndMoney(BigDecimalUtil.subtract(beforeInStockMoney,beforeOutStockMoney));
+                     beforeStockTrace = stockTrace;
+ 
+                 }
+@@ -315,9 +320,14 @@
+             int index = 0;
+             for(String key : sortKeys){
+                 double inQuantitySum = map.get(key).stream().mapToDouble(VoInventoryStockTrace::getInStockQuantity).sum();
+-                double inMoneySum = map.get(key).stream().mapToDouble(VoInventoryStockTrace::getInStockMoney).sum();
+                 double outQuantitySum = map.get(key).stream().mapToDouble(VoInventoryStockTrace::getOutStockQuantity).sum();
+-                double outMoneySum = map.get(key).stream().mapToDouble(VoInventoryStockTrace::getOutStockMoney).sum();
++                double inMoneySum = 0d;
++                double outMoneySum = 0d;
++                for (VoInventoryStockTrace trace : map.get(key)) {
++                    inMoneySum = BigDecimalUtil.sumNoParse(inMoneySum, trace.getInStockMoney());
++                    outMoneySum = BigDecimalUtil.sumNoParse(outMoneySum, trace.getOutStockMoney());
++                }
++
+                 if(index == 0 && beforeStockTrace != null){
+                     newStockTraces.add(beforeStockTrace);
+                 }
+@@ -329,16 +339,17 @@
+                         VoInventoryStockTrace previous = (size == 0 ? null:newStockTraces.get(size-1));
+                         VoInventoryStockTrace stockTrace = traceList.get(i);
+                         stockTrace.setEndQuantity(stockTrace.getInStockQuantity()-stockTrace.getOutStockQuantity());
+-                        stockTrace.setEndMoney(stockTrace.getInStockMoney()-stockTrace.getOutStockMoney());
++                        stockTrace.setEndMoney(BigDecimalUtil.subtract(stockTrace.getInStockMoney(),stockTrace.getOutStockMoney()));
+                         if(previous != null){
+                             stockTrace.setEndQuantity(stockTrace.getEndQuantity()+previous.getEndQuantity());
+-                            stockTrace.setEndMoney(stockTrace.getEndMoney()+previous.getEndMoney());
++                            stockTrace.setEndMoney(BigDecimalUtil.sumNoParse(stockTrace.getEndMoney(),previous.getEndMoney()));
+                         }
+                     }else{
+                         VoInventoryStockTrace stockTrace = traceList.get(i);
+                         VoInventoryStockTrace lastStockTrace = traceList.get(i - 1);
+                         stockTrace.setEndQuantity(lastStockTrace.getEndQuantity()+stockTrace.getInStockQuantity()-stockTrace.getOutStockQuantity());
+-                        stockTrace.setEndMoney(lastStockTrace.getEndMoney()+stockTrace.getInStockMoney()-stockTrace.getOutStockMoney());
++                        Double tmp = BigDecimalUtil.sumNoParse(lastStockTrace.getEndMoney(), stockTrace.getInStockMoney());
++                        stockTrace.setEndMoney(BigDecimalUtil.subtract(tmp,stockTrace.getOutStockMoney()));
+                     }
+                 }
+                 newStockTraces.addAll(traceList);
+@@ -362,15 +373,19 @@
+             List<VoInventoryStockTrace> traces = newStockTraces.stream().
+                     filter(e -> e.getBillDate() == null && e.getBillNo() == null).collect(Collectors.toList());
+             double lastInStockQuantity = traces.stream().mapToDouble(VoInventoryStockTrace::getInStockQuantity).sum();
+-            double lastInStockMoney = traces.stream().mapToDouble(VoInventoryStockTrace::getInStockMoney).sum();
++            double lastInStockMoney = 0d;
+             double lastOutStockQuantity = traces.stream().mapToDouble(VoInventoryStockTrace::getOutStockQuantity).sum();
+-            double lastOutStockMoney = traces.stream().mapToDouble(VoInventoryStockTrace::getOutStockMoney).sum();
++            double lastOutStockMoney = 0d;
++            for (VoInventoryStockTrace trace : traces) {
++                lastInStockMoney = BigDecimalUtil.sumNoParse(lastInStockMoney,trace.getInStockMoney());
++                lastOutStockMoney = BigDecimalUtil.sumNoParse(lastOutStockMoney,trace.getOutStockMoney());
++            }
+             lastStockTrace.setInStockQuantity(lastInStockQuantity);
+             lastStockTrace.setInStockMoney(lastInStockMoney);
+             lastStockTrace.setOutStockQuantity(lastOutStockQuantity);
+             lastStockTrace.setOutStockMoney(lastOutStockMoney);
+             lastStockTrace.setEndQuantity(lastInStockQuantity-lastOutStockQuantity);
+-            lastStockTrace.setEndMoney(lastInStockMoney-lastOutStockMoney);
++            lastStockTrace.setEndMoney(BigDecimalUtil.subtract(lastInStockMoney,lastOutStockMoney));
+             newStockTraces.add(lastStockTrace);
+         }
+         newStockTraces.forEach(e->{
+
+Property changes on: biz/inventory/com.zyxk.sl.kcglservice/src/main/java/com/zyxk/sl/kcglservice/service/impl/SStockTraceServiceImpl.java
+___________________________________________________________________
+Modified: svn:mergeinfo
+   Merged /branches/DEV/02_Codes/shr-parent/biz/inventory/com.zyxk.sl.kcglservice/src/main/java/com/zyxk/sl/kcglservice/service/impl/SStockTraceServiceImpl.java:r8702-8706,8711-8719
+Index: biz/inventory/com.zyxk.sl.kcglservice/src/main/java/com/zyxk/sl/kcglservice/service/impl/SInStockServiceImpl.java
+===================================================================
+--- biz/inventory/com.zyxk.sl.kcglservice/src/main/java/com/zyxk/sl/kcglservice/service/impl/SInStockServiceImpl.java	(revision 8661)
++++ biz/inventory/com.zyxk.sl.kcglservice/src/main/java/com/zyxk/sl/kcglservice/service/impl/SInStockServiceImpl.java	(revision 8749)
+@@ -25,13 +25,10 @@
+ import net.sourceforge.pinyin4j.format.HanyuPinyinVCharType;
+ import net.sourceforge.pinyin4j.format.exception.BadHanyuPinyinOutputFormatCombination;
+ import org.apache.commons.lang3.StringUtils;
+-import org.redisson.api.RAtomicLong;
+-import org.redisson.api.RedissonClient;
+ import org.slf4j.Logger;
+ import org.slf4j.LoggerFactory;
+ import org.springframework.beans.BeanUtils;
+ import org.springframework.beans.factory.annotation.Autowired;
+-import org.springframework.beans.factory.annotation.Value;
+ import org.springframework.stereotype.Service;
+ import org.springframework.transaction.annotation.Transactional;
+ import org.springframework.transaction.interceptor.TransactionAspectSupport;
+@@ -41,9 +38,6 @@
+ import java.io.IOException;
+ import java.io.InputStream;
+ import java.io.OutputStream;
+-import java.lang.reflect.Field;
+-import java.lang.reflect.InvocationTargetException;
+-import java.lang.reflect.Method;
+ import java.math.BigDecimal;
+ import java.math.RoundingMode;
+ import java.net.Inet4Address;
+@@ -53,11 +47,9 @@
+ import java.text.ParseException;
+ import java.text.SimpleDateFormat;
+ import java.util.*;
+-import java.util.concurrent.TimeUnit;
+ import java.util.regex.Matcher;
+ import java.util.regex.Pattern;
+ import java.util.stream.Collectors;
+-import java.util.stream.Stream;
+ 
+ import static com.zyxk.sl.kcglservice.util.StringUtil.deciamlFormat;
+ 
+@@ -2695,8 +2687,8 @@
+         Double reviseSum = 0D;
+         if (detail != null && detail.size() > 0) {
+             for (VoInStockSummary voInStockSummary : detail) {
+-                sum += voInStockSummary.getAmountOfMoney();
+-                reviseSum += voInStockSummary.getReviseOfMoney();
++                sum = BigDecimalUtil.sumNoParse(sum,voInStockSummary.getAmountOfMoney());
++                reviseSum = BigDecimalUtil.sumNoParse(sum,voInStockSummary.getReviseOfMoney());
+             }
+         }
+ 
+@@ -2747,8 +2739,8 @@
+         if (detail != null && detail.size() > 0) {
+             for (VoInStockDayOfListing voInStockDayOfListing : detail) {
+                 sum += voInStockDayOfListing.getQuantity();
+-                amountOfMoneys += voInStockDayOfListing.getAmountOfMoney();
+-                reviseOfMoneys += voInStockDayOfListing.getReviseOfMoney();
++                amountOfMoneys = BigDecimalUtil.sumNoParse(amountOfMoneys,voInStockDayOfListing.getAmountOfMoney());
++                reviseOfMoneys = BigDecimalUtil.sumNoParse(reviseOfMoneys,voInStockDayOfListing.getReviseOfMoney());
+                 voInStockDayOfListing.setBillDate(dateFormat.format(voInStockDayOfListing.getBillDateF()));
+             }
+         }
+@@ -5891,10 +5883,10 @@
+         Double money = 0.0;
+         Double czje = 0.0;
+         for (VoInStockReport summary : list) {
+-            money = money + summary.getAmountOfMoney();
+-            czje = czje + summary.getUpdateAmountOfMoney();
++            money = BigDecimalUtil.sumNoParse(money,summary.getAmountOfMoney());
++            czje = BigDecimalUtil.sumNoParse(czje , summary.getUpdateAmountOfMoney());
+         }
+-        return money + czje;
++        return BigDecimalUtil.sumNoParse(money,czje);
+     }
+ 
+ 
+Index: biz/inventory/com.zyxk.sl.kcglservice/src/main/java/com/zyxk/sl/kcglservice/service/impl/SOutStockServiceImpl.java
+===================================================================
+--- biz/inventory/com.zyxk.sl.kcglservice/src/main/java/com/zyxk/sl/kcglservice/service/impl/SOutStockServiceImpl.java	(revision 8661)
++++ biz/inventory/com.zyxk.sl.kcglservice/src/main/java/com/zyxk/sl/kcglservice/service/impl/SOutStockServiceImpl.java	(revision 8749)
+@@ -1938,8 +1938,8 @@
+         if (detail != null && detail.size() > 0) {
+             for (VoOutStockDayOfListing voOutStockDayOfListing : detail) {
+                 sum += voOutStockDayOfListing.getQuantity();
+-                amountOfMoneys += voOutStockDayOfListing.getAmountOfMoney();
+-                reviseOfMoneys += voOutStockDayOfListing.getReviseOfMoney();
++                amountOfMoneys = BigDecimalUtil.sumNoParse(amountOfMoneys,voOutStockDayOfListing.getAmountOfMoney());
++                reviseOfMoneys = BigDecimalUtil.sumNoParse(reviseOfMoneys,voOutStockDayOfListing.getReviseOfMoney());
+                 voOutStockDayOfListing.setBillDate(dateFormat.format(voOutStockDayOfListing.getBillDateF()));
+             }
+         }
+@@ -2005,12 +2005,12 @@
+             stockCountSet.addAll(details);
+             List<VoOutStockReportReceive> uinque = new ArrayList<>(stockCountSet);
+             for (VoOutStockReportReceive stockCount : uinque) {
+-                purchaseMoneys += stockCount.getInStockMoney();
+-                balances += stockCount.getEndMoney();
+-                lnitialMoneys += (stockCount.getStartMoney() == null ? 0D : stockCount.getStartMoney());
++                purchaseMoneys = BigDecimalUtil.sumNoParse(purchaseMoneys,stockCount.getInStockMoney());
++                balances = BigDecimalUtil.sumNoParse(balances,stockCount.getEndMoney());
++                lnitialMoneys = BigDecimalUtil.sumNoParse(lnitialMoneys,stockCount.getStartMoney() == null ? 0D : stockCount.getStartMoney());
+             }
+             for (VoOutStockReportReceive sStockCount : details) {
+-                recipientsMoneys += sStockCount.getOutStockMoney();
++                recipientsMoneys += BigDecimalUtil.sumNoParse(recipientsMoneys,sStockCount.getOutStockMoney());
+             }
+         }
+         map.put("lnitialMoneys", decimalFormat.format(lnitialMoneys));
+@@ -3057,8 +3057,8 @@
+ 
+             String updateAmountOfMoneyStr = decimalFormat.format(report.getUpdateAmountOfMoney());
+ 
+-            totalAmount = totalAmount + report.getAmountOfMoney();
+-            ckAmount = ckAmount + report.getUpdateAmountOfMoney();
++            totalAmount = BigDecimalUtil.sumNoParse(totalAmount , report.getAmountOfMoney());
++            ckAmount = BigDecimalUtil.sumNoParse(ckAmount , report.getUpdateAmountOfMoney());
+             if (report.getUpdateAmountOfMoney() != 0) {
+                 report.setUpdateAmountOfMoney(report.getUpdateAmountOfMoney() * -1);
+                 report.setUpdateAmountOfMoneyStr(String.format("-%s",updateAmountOfMoneyStr));
+Index: biz/inventory/com.zyxk.sl.kcglservice/src/main/java/com/zyxk/sl/kcglservice/service/impl/SStockDynamicReportServiceImpl.java
+===================================================================
+--- biz/inventory/com.zyxk.sl.kcglservice/src/main/java/com/zyxk/sl/kcglservice/service/impl/SStockDynamicReportServiceImpl.java	(revision 8661)
++++ biz/inventory/com.zyxk.sl.kcglservice/src/main/java/com/zyxk/sl/kcglservice/service/impl/SStockDynamicReportServiceImpl.java	(revision 8749)
+@@ -393,7 +393,7 @@
+             for (int i = 1; i <= details.size(); i++) {
+                 row[i] = decimalFormat.format(supplierSummary.getDetails().get(i - 1).getSupplierMoney());
+             }
+-            Double money = BigDecimalUtil.sum(supplierSummary.getDetails().stream().map(VoDynamicInStockSupplierSummaryDetail::getSupplierMoney).collect(Collectors.toList()));
++            Double money = BigDecimalUtil.sumNoParse(supplierSummary.getDetails().stream().map(VoDynamicInStockSupplierSummaryDetail::getSupplierMoney).collect(Collectors.toList()));
+             row[details.size() + 1] = decimalFormat.format(money);
+             rows.add(row);
+         }
+
+Property changes on: biz/inventory/com.zyxk.sl.kcglservice/src/main/java/com/zyxk/sl/kcglservice/service/impl/SStockDynamicReportServiceImpl.java
+___________________________________________________________________
+Modified: svn:mergeinfo
+   Merged /branches/DEV/02_Codes/shr-parent/biz/inventory/com.zyxk.sl.kcglservice/src/main/java/com/zyxk/sl/kcglservice/service/impl/SStockDynamicReportServiceImpl.java:r8656-8661
+Index: biz/inventory/com.zyxk.sl.kcglservice/src/main/java/com/zyxk/sl/kcglservice/component
+===================================================================
+--- biz/inventory/com.zyxk.sl.kcglservice/src/main/java/com/zyxk/sl/kcglservice/component	(revision 8661)
++++ biz/inventory/com.zyxk.sl.kcglservice/src/main/java/com/zyxk/sl/kcglservice/component	(revision 8749)
+
+Property changes on: biz/inventory/com.zyxk.sl.kcglservice/src/main/java/com/zyxk/sl/kcglservice/component
+___________________________________________________________________
+Modified: svn:mergeinfo
+   Merged /branches/DEV/02_Codes/shr-parent/biz/inventory/com.zyxk.sl.kcglservice/src/main/java/com/zyxk/sl/kcglservice/component:r8572-8577
+Index: biz/inventory/com.zyxk.sl.kcglservice/src/main/java/com/zyxk/sl/kcglservice/rediskey
+===================================================================
+--- biz/inventory/com.zyxk.sl.kcglservice/src/main/java/com/zyxk/sl/kcglservice/rediskey	(revision 8661)
++++ biz/inventory/com.zyxk.sl.kcglservice/src/main/java/com/zyxk/sl/kcglservice/rediskey	(revision 8749)
+
+Property changes on: biz/inventory/com.zyxk.sl.kcglservice/src/main/java/com/zyxk/sl/kcglservice/rediskey
+___________________________________________________________________
+Modified: svn:mergeinfo
+   Merged /branches/DEV/02_Codes/shr-parent/biz/inventory/com.zyxk.sl.kcglservice/src/main/java/com/zyxk/sl/kcglservice/rediskey:r8572-8577
+Index: biz/inventory/com.zyxk.sl.kcglservice/src/main/resources/com/zyxk/sl/kcglservice/mapper/SOutStockMapper.xml
+===================================================================
+--- biz/inventory/com.zyxk.sl.kcglservice/src/main/resources/com/zyxk/sl/kcglservice/mapper/SOutStockMapper.xml	(revision 8661)
++++ biz/inventory/com.zyxk.sl.kcglservice/src/main/resources/com/zyxk/sl/kcglservice/mapper/SOutStockMapper.xml	(revision 8749)
+@@ -198,7 +198,7 @@
+         left join S_OUT_STOCK t23 on t23.outstockid = t21.ckdid
+         left join s_warehouse t24 on t24.warehouseid=t23.ckbh
+         left join s_organization t25 on t25.organizationid=t23.ckjg
+-        where t21.active = 1 and t23.active = 1 and ((t23.cklb in (4,7) and t23.djzt in (2,4)) or (t23.cklb in(2,5) and t23.djzt in (1,4)))
++        where t21.active = 1 and t23.active = 1 and ((t23.cklb in (4,7,8) and t23.djzt in (2,4)) or (t23.cklb in(2,5) and t23.djzt in (1,4)))
+         and t24.zt=1 and t25.jgzt=1
+         and t23.ckjg = #{organization,jdbcType=TIMESTAMP}
+         <if test="outStockWarehouses != null and outStockWarehouses.size>0">
+@@ -1692,7 +1692,7 @@
+         left join s_metering_unit t14 on t14.meteringunitid=t13.kcjldw
+         left join s_dictionary t15 on to_char(t12.cklb) = t15.zdbm and t15.zdlx = 'OutStockType'
+         left join s_organization t16 on t16.organizationid=t12.ckjg
+-        where t11.active=1 and t12.active=1 and ((t12.cklb in(4,7) and t12.djzt in(2,4)) or (t12.cklb in(2,5) and t12.djzt in (1,4)))
++        where t11.active=1 and t12.active=1 and ((t12.cklb in(4,7,8) and t12.djzt in(2,4)) or (t12.cklb in(2,5) and t12.djzt in (1,4)))
+         and to_number(t16.jgzt)=1
+         <if test="warehouseIds != null and warehouseIds.length>0">
+             and t12.ckbh in
+Index: biz/inventory/com.zyxk.sl.kcglservice/src/main/resources/com/zyxk/sl/kcglservice/mapper/SInStockMapper.xml
+===================================================================
+--- biz/inventory/com.zyxk.sl.kcglservice/src/main/resources/com/zyxk/sl/kcglservice/mapper/SInStockMapper.xml	(revision 8661)
++++ biz/inventory/com.zyxk.sl.kcglservice/src/main/resources/com/zyxk/sl/kcglservice/mapper/SInStockMapper.xml	(revision 8749)
+@@ -581,7 +581,7 @@
+          left join S_SUPPLIER t4 on t1.chgys = t4.supplierid
+          left join s_dictionary t5 on to_char(t.rklb) = t5.zdbm and t5.zdlx = 'InStockType'
+          left join s_organization t6 on t6.organizationid=t.jgbm
+-         where t.active = 1 and t1.active = 1 and ((t.rkdzt in (2,4) and t.rklb in (0,6,8,9)) or (t.rkdzt in (1,4) and t.rklb in (3,4)))
++         where t.active = 1 and t1.active = 1 and ((t.rkdzt in (2,4) and t.rklb in (0,6,7,8,9)) or (t.rkdzt in (1,4) and t.rklb in (3,4)))
+          and (t1.xqlx is null or t1.xqlx = 2) and to_number(t6.jgzt)=1
+          <if test="startCreateTime != null">
+             and t.rkrq >= #{startCreateTime,jdbcType=TIMESTAMP}
+@@ -1288,7 +1288,7 @@
+         left join s_dictionary t25 on to_char(t21.rklb) = t25.zdbm and t25.zdlx = 'InStockType'
+         left join s_organization t26 on t26.organizationid=t21.jgbm
+         where t21.active = 1 and t22.active = 1 and((t21.rkdzt in (2,4)
+-        and t21.rklb in (0,6,8)) or (t21.rkdzt in (1,4) and t21.rklb in (3,4)))
++        and t21.rklb in (0,6,7,8)) or (t21.rkdzt in (1,4) and t21.rklb in (3,4)))
+         and (t22.xqlx is null or t22.xqlx = 2) and t26.jgzt=1
+         <if test="startCreateTime != null">
+             and t21.rkrq >= #{startCreateTime,jdbcType=TIMESTAMP}
+Index: biz/inventory/com.xk.msa.crservice
+===================================================================
+--- biz/inventory/com.xk.msa.crservice	(revision 8661)
++++ biz/inventory/com.xk.msa.crservice	(revision 8749)
+
+Property changes on: biz/inventory/com.xk.msa.crservice
+___________________________________________________________________
+Modified: svn:mergeinfo
+   Merged /branches/DEV/02_Codes/shr-parent/biz/inventory/com.xk.msa.crservice:r8548-8565
+Index: biz
+===================================================================
+--- biz	(revision 8661)
++++ biz	(revision 8749)
+
+Property changes on: biz
+___________________________________________________________________
+Modified: svn:mergeinfo
+   Merged /branches/DEV/02_Codes/shr-parent/biz:r8048,8131-8138,8151-8161,8166,8169-8200,8207-8237,8258-8278,8281-8284,8289-8310,8316,8331-8373,8396-8402,8409-8425,8435-8456,8472-8481,8486-8502,8505-8508,8516-8526,8548-8565,8572-8577,8579-8583,8628-8636,8656-8661
+Index: .
+===================================================================
+--- .	(revision 8661)
++++ .	(revision 8749)
+
+Property changes on: .
+___________________________________________________________________
+Modified: svn:mergeinfo
+   Merged /branches/DEV/02_Codes/shr-parent:r8039,8048,8063-8077,8114-8124,8131-8138,8151-8161,8166,8169-8200,8202-8203,8207-8237,8258-8278,8281-8284,8289-8310,8314,8316,8325-8328,8331-8373,8396-8402,8408-8425,8435-8457,8472-8481,8486-8502,8505-8508,8516-8526,8531-8534,8541-8542,8548-8565,8567,8572-8577,8579-8583,8628-8636,8645,8656-8661
