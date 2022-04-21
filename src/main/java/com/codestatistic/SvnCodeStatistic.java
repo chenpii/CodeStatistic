@@ -1,6 +1,7 @@
 package com.codestatistic;
 
 import com.codestatistic.bean.ExcelStatisticFile;
+import com.codestatistic.bean.LineChar_CLS;
 import com.codestatistic.bean.SvnFile;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.ss.usermodel.Cell;
@@ -8,6 +9,7 @@ import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.jfree.chart.JFreeChart;
+import org.jfree.data.category.CategoryDataset;
 import org.joda.time.DateTime;
 import org.joda.time.Weeks;
 
@@ -34,6 +36,10 @@ public class SvnCodeStatistic {
         excelStatisticFile.apppendDateToExcel(excelfile, addLines, deleteLines, netAddLines);
 
         //从excel数据生成图表
+        LineChar_CLS lineChar_cls = new LineChar_CLS();
+        CategoryDataset dataset = lineChar_cls.creatDataset(excelStatisticFile);
+        JFreeChart chart = lineChar_cls.createChart(dataset);
+        lineChar_cls.saveAsJPG(chart, "./chart.jpg", 600, 400);
 
     }
 
