@@ -7,6 +7,7 @@ import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
+import org.jfree.chart.JFreeChart;
 import org.joda.time.DateTime;
 import org.joda.time.Weeks;
 
@@ -28,8 +29,12 @@ public class SvnCodeStatistic {
         System.out.println("删除行数：" + deleteLines);
         System.out.println("净增行数：" + netAddLines);
 
+        //保存数据到excel
         ExcelStatisticFile excelStatisticFile = new ExcelStatisticFile(excelfile);
         excelStatisticFile.apppendDateToExcel(excelfile, addLines, deleteLines, netAddLines);
+
+        //从excel数据生成图表
+
     }
 
 }

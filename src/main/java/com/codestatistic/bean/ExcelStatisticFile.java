@@ -50,7 +50,6 @@ public class ExcelStatisticFile extends File {
     }
 
     public void createExcel(String excelfile) throws IOException {
-//        FileInputStream fis = new FileInputStream(excelfile);
         System.out.println(excelfile + "不存在，自动创建");
         //1.创建工作簿
         Workbook workbook = new HSSFWorkbook();
