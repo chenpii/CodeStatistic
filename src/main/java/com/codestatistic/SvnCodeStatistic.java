@@ -11,6 +11,8 @@ import org.jfree.chart.ChartFactory;
 import org.jfree.chart.ChartUtilities;
 import org.jfree.chart.JFreeChart;
 import org.jfree.chart.plot.CategoryPlot;
+import org.jfree.chart.plot.PiePlot;
+import org.jfree.chart.plot.Plot;
 import org.jfree.chart.plot.PlotOrientation;
 import org.jfree.chart.renderer.category.CategoryItemRenderer;
 import org.jfree.data.category.CategoryDataset;
@@ -65,7 +67,6 @@ public class SvnCodeStatistic {
 
 //            row.getCell(0).setCellValue(Cell.CELL_TYPE_NUMERIC);
             String dateCellValue = row.getCell(0).getStringCellValue();
-            String dateTime = new DateTime(dateCellValue).toString("yyyy-MM-dd");
 
 //            row.getCell(1).setCellValue(Cell.CELL_TYPE_NUMERIC);
             double addLineCellValue = row.getCell(1).getNumericCellValue();
@@ -76,7 +77,7 @@ public class SvnCodeStatistic {
 //            row.getCell(3).setCellValue(Cell.CELL_TYPE_NUMERIC);
             double netaddLineCellValue = row.getCell(3).getNumericCellValue();
 
-            System.out.println("Date:" + dateCellValue + ",add:" + addLineCellValue + ",delete:" + deleteLineCellValue + ",netadd:" + netaddLineCellValue);
+//            System.out.println("Date:" + dateCellValue + ",add:" + addLineCellValue + ",delete:" + deleteLineCellValue + ",netadd:" + netaddLineCellValue);
 
             dataset.setValue(addLineCellValue, series1, dateCellValue);
             dataset.setValue(deleteLineCellValue, series2, dateCellValue);
@@ -98,6 +99,10 @@ public class SvnCodeStatistic {
                 true,//显示工具提示
                 false
         );
+        //背景色
+        Plot plot = chart.getPlot();
+        plot.setBackgroundPaint(SystemColor.WHITE);
+
         CategoryPlot categoryPlot = chart.getCategoryPlot();
         CategoryItemRenderer renderer = categoryPlot.getRenderer();
         renderer.setSeriesPaint(0, Color.GREEN);//第1条线为绿色

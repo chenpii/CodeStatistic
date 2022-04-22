@@ -1,10 +1,12 @@
 package com.codestatistic.bean;
 
+import org.apache.poi.hssf.usermodel.HSSFCellStyle;
+import org.apache.poi.hssf.usermodel.HSSFDataFormat;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
-import org.apache.poi.ss.usermodel.Cell;
-import org.apache.poi.ss.usermodel.Row;
-import org.apache.poi.ss.usermodel.Sheet;
-import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.ss.usermodel.*;
+import org.apache.poi.xssf.usermodel.XSSFCell;
+import org.apache.poi.xssf.usermodel.XSSFCellStyle;
+import org.apache.poi.xssf.usermodel.XSSFDataFormat;
 import org.joda.time.DateTime;
 
 import java.io.File;
@@ -37,21 +39,25 @@ public class ExcelStatisticFile extends File {
         int RowNum = linesSheet.getLastRowNum() + 1;
         Row row = linesSheet.createRow(RowNum);
 
-        //日期为前一天
-        row.createCell(0).setCellType(Cell.CELL_TYPE_NUMERIC);
-        row.createCell(0).setCellValue(new DateTime().plusDays(-1).toString("yyyy-MM-dd"));
-        row.createCell(1).setCellType(Cell.CELL_TYPE_NUMERIC);
-        row.createCell(1).setCellValue(addlines);
-        row.createCell(2).setCellType(Cell.CELL_TYPE_NUMERIC);
-        row.createCell(2).setCellValue(deletelines);
-        row.createCell(3).setCellType(Cell.CELL_TYPE_NUMERIC);
-        row.createCell(3).setCellValue(netaddlines);
+        //日期
+        Cell dateCell = row.createCell(0);
+        dateCell.setCellValue(new DateTime().plusDays(-1).toString("yyyy-MM-dd"));
+        //新增行
+        Cell addCell = row.createCell(1);
+//        addCell.setCellType(XSSFCell.CELL_TYPE_NUMERIC);
+        addCell.setCellValue(addlines);
+        //删除行
+        Cell deleteCell = row.createCell(2);
+//        deleteCell.setCellType(XSSFCell.CELL_TYPE_NUMERIC);
+        deleteCell.setCellValue(deletelines);
+        //净增行
+        Cell netCell = row.createCell(3);
+//        netCell.setCellType(XSSFCell.CELL_TYPE_NUMERIC);
+        netCell.setCellValue(netaddlines);
 
         FileOutputStream fos = new FileOutputStream(excelfile);
         workbook.write(fos);
         fos.close();
-
-
     }
 
     public void createExcel(String excelfile) throws IOException {
