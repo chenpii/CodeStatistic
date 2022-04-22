@@ -40,6 +40,7 @@ public class SvnCodeStatistic {
         System.out.println("净增行数：" + netAddLines);
 
         //保存数据到excel
+
         ExcelStatisticFile excelStatisticFile = new ExcelStatisticFile(excelfile);
         excelStatisticFile.apppendDateToExcel(excelfile, addLines, deleteLines, netAddLines);
 
@@ -89,6 +90,7 @@ public class SvnCodeStatistic {
 
     //根据dataset创建Jfreechart对象
     public static JFreeChart createChart(CategoryDataset dataset) {
+        System.out.println("生成图表...");
         JFreeChart chart = ChartFactory.createLineChart(
                 "Daily Code Line Statistics",//标题
                 "Date",//横坐标标签
@@ -115,6 +117,7 @@ public class SvnCodeStatistic {
     // 保存成jpg
     public static void saveAsJPG(JFreeChart chart, String outputPath,
                                  int weight, int height) {
+        System.out.println("导出成" + outputPath);
         FileOutputStream out = null;
         try {
             File outFile = new File(outputPath);
