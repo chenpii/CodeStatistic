@@ -34,14 +34,27 @@ public class ExcelStatisticFile extends File {
         }
         System.out.println("追加数据至" + excelfile);
         FileInputStream fis = new FileInputStream(excelfile);
+
         Workbook workbook = new HSSFWorkbook(fis);
         Sheet linesSheet = workbook.getSheet("lines");
-        int RowNum = linesSheet.getLastRowNum() + 1;
+
+
+        //判断追加到哪一行
+        int RowNum;
+        String dateValue = new DateTime().plusDays(-1).toString("yyyy-MM-dd");
+        Row lastrow = linesSheet.getRow(linesSheet.getLastRowNum());
+        String lastRowDateValue = lastrow.getCell(0).getStringCellValue();
+        if (lastRowDateValue.equals(dateValue)) {
+            RowNum = linesSheet.getLastRowNum();
+        } else {
+
+            RowNum = linesSheet.getLastRowNum() + 1;
+        }
         Row row = linesSheet.createRow(RowNum);
 
         //日期
         Cell dateCell = row.createCell(0);
-        dateCell.setCellValue(new DateTime().plusDays(-1).toString("yyyy-MM-dd"));
+        dateCell.setCellValue(dateValue);
         //新增行
         Cell addCell = row.createCell(1);
 //        addCell.setCellType(XSSFCell.CELL_TYPE_NUMERIC);
