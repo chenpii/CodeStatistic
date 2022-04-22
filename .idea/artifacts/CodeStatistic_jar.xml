@@ -12,17 +12,6 @@
       <element id="extracted-dir" path="$MAVEN_REPOSITORY$/commons-codec/commons-codec/1.9/commons-codec-1.9.jar" path-in-jar="/" />
       <element id="extracted-dir" path="$MAVEN_REPOSITORY$/org/jfree/jcommon/1.0.23/jcommon-1.0.23.jar" path-in-jar="/" />
       <element id="extracted-dir" path="$MAVEN_REPOSITORY$/org/apache/xmlbeans/xmlbeans/2.6.0/xmlbeans-2.6.0.jar" path-in-jar="/" />
-      <element id="directory" name="lib">
-        <element id="library" level="project" name="Maven: commons-codec:commons-codec:1.9" />
-        <element id="library" level="project" name="Maven: joda-time:joda-time:2.10.5" />
-        <element id="library" level="project" name="Maven: org.apache.poi:poi-ooxml-schemas:3.13" />
-        <element id="library" level="project" name="Maven: org.apache.poi:poi-ooxml:3.13" />
-        <element id="library" level="project" name="Maven: org.apache.poi:poi:3.13" />
-        <element id="library" level="project" name="Maven: org.apache.xmlbeans:xmlbeans:2.6.0" />
-        <element id="library" level="project" name="Maven: org.jfree:jcommon:1.0.23" />
-        <element id="library" level="project" name="Maven: org.jfree:jfreechart:1.0.19" />
-        <element id="library" level="project" name="Maven: stax:stax-api:1.0.1" />
-      </element>
     </root>
   </artifact>
 </component>
