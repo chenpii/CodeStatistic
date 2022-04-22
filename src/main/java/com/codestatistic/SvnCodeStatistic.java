@@ -1,19 +1,24 @@
 package com.codestatistic;
 
 import com.codestatistic.bean.ExcelStatisticFile;
-import com.codestatistic.bean.LineChar_CLS;
 import com.codestatistic.bean.SvnFile;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
-import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
+import org.jfree.chart.ChartFactory;
+import org.jfree.chart.ChartUtilities;
 import org.jfree.chart.JFreeChart;
+import org.jfree.chart.plot.CategoryPlot;
+import org.jfree.chart.plot.PlotOrientation;
+import org.jfree.chart.renderer.category.CategoryItemRenderer;
 import org.jfree.data.category.CategoryDataset;
+import org.jfree.data.category.DefaultCategoryDataset;
 import org.joda.time.DateTime;
-import org.joda.time.Weeks;
 
+import java.awt.*;
 import java.io.*;
+import java.util.Date;
 
 /**
  * @author chenpi
@@ -36,11 +41,104 @@ public class SvnCodeStatistic {
         excelStatisticFile.apppendDateToExcel(excelfile, addLines, deleteLines, netAddLines);
 
         //从excel数据生成图表
-        LineChar_CLS lineChar_cls = new LineChar_CLS();
-        CategoryDataset dataset = lineChar_cls.creatDataset(excelStatisticFile);
-        JFreeChart chart = lineChar_cls.createChart(dataset);
-        lineChar_cls.saveAsJPG(chart, "./chart.jpg", 600, 400);
+        CategoryDataset dataset = creatDataset(excelStatisticFile);
+        JFreeChart chart = createChart(dataset);
+        saveAsJPG(chart, "./linechart.jpg", 600, 400);
 
+    }
+
+    public static CategoryDataset creatDataset(ExcelStatisticFile excelFile) throws IOException {
+
+        DefaultCategoryDataset dataset = new DefaultCategoryDataset();
+        // keys
+        String series1 = "add";
+        String series2 = "delete";
+        String series3 = "netadd";
+
+        FileInputStream fis = new FileInputStream(excelFile);
+        Workbook workbook = new HSSFWorkbook(fis);
+        Sheet linesSheet = workbook.getSheet("lines");
+        int lastRowNum = linesSheet.getLastRowNum();
+        for (int i = 1; i < lastRowNum; i++) {
+            Row row = linesSheet.getRow(i);
+
+            System.out.println(row.getCell(0).getDateCellValue());
+            System.out.println(row.getCell(1).getNumericCellValue());
+            System.out.println(row.getCell(2).getNumericCellValue());
+            System.out.println(row.getCell(3).getNumericCellValue());
+
+//            row.getCell(0).setCellValue(Cell.CELL_TYPE_NUMERIC);
+            Date dateCellValue = row.getCell(0).getDateCellValue();
+            String dateTime = new DateTime(dateCellValue).toString("yyyy-MM-dd");
+
+//            row.getCell(1).setCellValue(Cell.CELL_TYPE_NUMERIC);
+            double addLineCellValue = row.getCell(1).getNumericCellValue();
+
+//            row.getCell(2).setCellValue(Cell.CELL_TYPE_NUMERIC);
+            double deleteLineCellValue = row.getCell(2).getNumericCellValue();
+
+//            row.getCell(3).setCellValue(Cell.CELL_TYPE_NUMERIC);
+            double netaddLineCellValue = row.getCell(3).getNumericCellValue();
+
+            System.out.println("Date:" + dateTime + ",add:" + addLineCellValue + ",delete:" + deleteLineCellValue + ",netadd:" + netaddLineCellValue);
+
+            dataset.setValue(addLineCellValue, series1, dateTime);
+            dataset.setValue(deleteLineCellValue, series2, dateTime);
+            dataset.setValue(netaddLineCellValue, series3, dateTime);
+        }
+        fis.close();
+        return dataset;
+    }
+
+    //根据dataset创建Jfreechart对象
+    public static JFreeChart createChart(CategoryDataset dataset) {
+        JFreeChart chart = ChartFactory.createLineChart(
+                "Daily Code Line Statistics",//标题
+                "Date",//横坐标标签
+                "Lines",//纵坐标标签
+                dataset,
+                PlotOrientation.VERTICAL,//垂直
+                true,//显示说明
+                true,//显示工具提示
+                false
+        );
+        CategoryPlot categoryPlot = chart.getCategoryPlot();
+        CategoryItemRenderer renderer = categoryPlot.getRenderer();
+        renderer.setSeriesPaint(0, Color.GREEN);//第1条线为绿色
+        renderer.setSeriesPaint(1, Color.RED);//第2条线为红色
+        renderer.setSeriesPaint(2, Color.BLUE);//第3条线为蓝色
+
+        return chart;
+    }
+
+    // 保存成jpg
+    public static void saveAsJPG(JFreeChart chart, String outputPath,
+                                 int weight, int height) {
+        FileOutputStream out = null;
+        try {
+            File outFile = new File(outputPath);
+            if (!outFile.getParentFile().exists()) {
+                outFile.getParentFile().mkdirs();
+            }
+            out = new FileOutputStream(outputPath);
+            // 保存为PNG
+            // ChartUtilities.writeChartAsPNG(out, chart, 600, 400);
+            // 保存为JPEG
+            ChartUtilities.writeChartAsJPEG(out, chart, 600, 400);
+            out.flush();
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        } finally {
+            if (out != null) {
+                try {
+                    out.close();
+                } catch (IOException e) {
+                    // do nothing
+                }
+            }
+        }
     }
 
 }

@@ -38,9 +38,13 @@ public class ExcelStatisticFile extends File {
         Row row = linesSheet.createRow(RowNum);
 
         //日期为前一天
+        row.createCell(0).setCellType(Cell.CELL_TYPE_NUMERIC);
         row.createCell(0).setCellValue(new DateTime().plusDays(-1).toString("yyyy-MM-dd"));
+        row.createCell(1).setCellType(Cell.CELL_TYPE_NUMERIC);
         row.createCell(1).setCellValue(addlines);
+        row.createCell(2).setCellType(Cell.CELL_TYPE_NUMERIC);
         row.createCell(2).setCellValue(deletelines);
+        row.createCell(3).setCellType(Cell.CELL_TYPE_NUMERIC);
         row.createCell(3).setCellValue(netaddlines);
 
         FileOutputStream fos = new FileOutputStream(excelfile);
