@@ -3,7 +3,6 @@ package com.codestatistic;
 import com.codestatistic.bean.ExcelStatisticFile;
 import com.codestatistic.bean.SvnFile;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
-import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
@@ -11,17 +10,14 @@ import org.jfree.chart.ChartFactory;
 import org.jfree.chart.ChartUtilities;
 import org.jfree.chart.JFreeChart;
 import org.jfree.chart.plot.CategoryPlot;
-import org.jfree.chart.plot.PiePlot;
 import org.jfree.chart.plot.Plot;
 import org.jfree.chart.plot.PlotOrientation;
 import org.jfree.chart.renderer.category.CategoryItemRenderer;
 import org.jfree.data.category.CategoryDataset;
 import org.jfree.data.category.DefaultCategoryDataset;
-import org.joda.time.DateTime;
 
 import java.awt.*;
 import java.io.*;
-import java.util.Date;
 
 /**
  * @author chenpi
@@ -63,7 +59,7 @@ public class SvnCodeStatistic {
         Workbook workbook = new HSSFWorkbook(fis);
         Sheet linesSheet = workbook.getSheet("lines");
         int lastRowNum = linesSheet.getLastRowNum();
-        for (int i = 1; i < lastRowNum; i++) {
+        for (int i = 1; i <=lastRowNum ; i++) {
             Row row = linesSheet.getRow(i);
 
 //            row.getCell(0).setCellValue(Cell.CELL_TYPE_NUMERIC);
