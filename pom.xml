@@ -40,47 +40,25 @@
     </properties>
 
     <build>
-        <finalName>CodeStatistic</finalName>
         <plugins>
             <plugin>
-                <groupId>org.springframework.boot</groupId>
-                <artifactId>spring-boot-maven-plugin</artifactId>
-            </plugin>
-            <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-resources-plugin</artifactId>
-                <configuration>
-                    <nonFilteredFileExtensions> 
-                        <nonFilteredFileExtension>xls</nonFilteredFileExtension>
-                        <nonFilteredFileExtension>xlsx</nonFilteredFileExtension>
-                    </nonFilteredFileExtensions>
-                </configuration>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.3</version>
+
             </plugin>
 
             <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-jar-plugin</artifactId>
+                <artifactId>maven-assembly-plugin</artifactId>
                 <configuration>
-                    <excludes>
-                        <!-- 打包后的jar包中不包括配置文件 -->
-                        <exclude>*.yml</exclude>
-                        <exclude>*.xml</exclude>
-                    </excludes>
                     <archive>
                         <manifest>
                             <mainClass>com.codestatistic.SvnCodeStatistic</mainClass>
                         </manifest>
+                        <manifestEntries>
+                            <Class-Path>.</Class-Path>
+                        </manifestEntries>
                     </archive>
-                </configuration>
-            </plugin>
-
-            <!-- 打包插件 -->
-            <plugin>
-                <artifactId>maven-assembly-plugin</artifactId>
-                <configuration>
-                    <descriptors>
-                        <descriptor>assembly.xml</descriptor>
-                    </descriptors>
                 </configuration>
                 <executions>
                     <execution>
@@ -89,9 +67,16 @@
                         <goals>
                             <goal>single</goal>
                         </goals>
+                        <configuration>
+                            <descriptors>
+                                <descriptor>assembly.xml</descriptor>
+                            </descriptors>
+                        </configuration>
                     </execution>
                 </executions>
             </plugin>
         </plugins>
     </build>
+
+
 </project>
