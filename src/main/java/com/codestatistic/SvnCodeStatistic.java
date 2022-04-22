@@ -3,6 +3,7 @@ package com.codestatistic;
 import com.codestatistic.bean.ExcelStatisticFile;
 import com.codestatistic.bean.SvnFile;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
+import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
@@ -43,7 +44,7 @@ public class SvnCodeStatistic {
         //从excel数据生成图表
         CategoryDataset dataset = creatDataset(excelStatisticFile);
         JFreeChart chart = createChart(dataset);
-        saveAsJPG(chart, "./linechart.jpg", 600, 400);
+        saveAsJPG(chart, "./linechart.jpg", 800, 600);
 
     }
 
@@ -62,13 +63,8 @@ public class SvnCodeStatistic {
         for (int i = 1; i < lastRowNum; i++) {
             Row row = linesSheet.getRow(i);
 
-            System.out.println(row.getCell(0).getDateCellValue());
-            System.out.println(row.getCell(1).getNumericCellValue());
-            System.out.println(row.getCell(2).getNumericCellValue());
-            System.out.println(row.getCell(3).getNumericCellValue());
-
 //            row.getCell(0).setCellValue(Cell.CELL_TYPE_NUMERIC);
-            Date dateCellValue = row.getCell(0).getDateCellValue();
+            String dateCellValue = row.getCell(0).getStringCellValue();
             String dateTime = new DateTime(dateCellValue).toString("yyyy-MM-dd");
 
 //            row.getCell(1).setCellValue(Cell.CELL_TYPE_NUMERIC);
@@ -80,11 +76,11 @@ public class SvnCodeStatistic {
 //            row.getCell(3).setCellValue(Cell.CELL_TYPE_NUMERIC);
             double netaddLineCellValue = row.getCell(3).getNumericCellValue();
 
-            System.out.println("Date:" + dateTime + ",add:" + addLineCellValue + ",delete:" + deleteLineCellValue + ",netadd:" + netaddLineCellValue);
+            System.out.println("Date:" + dateCellValue + ",add:" + addLineCellValue + ",delete:" + deleteLineCellValue + ",netadd:" + netaddLineCellValue);
 
-            dataset.setValue(addLineCellValue, series1, dateTime);
-            dataset.setValue(deleteLineCellValue, series2, dateTime);
-            dataset.setValue(netaddLineCellValue, series3, dateTime);
+            dataset.setValue(addLineCellValue, series1, dateCellValue);
+            dataset.setValue(deleteLineCellValue, series2, dateCellValue);
+            dataset.setValue(netaddLineCellValue, series3, dateCellValue);
         }
         fis.close();
         return dataset;
@@ -124,7 +120,9 @@ public class SvnCodeStatistic {
             // 保存为PNG
             // ChartUtilities.writeChartAsPNG(out, chart, 600, 400);
             // 保存为JPEG
-            ChartUtilities.writeChartAsJPEG(out, chart, 600, 400);
+//            ChartUtilities.writeChartAsJPEG(out, chart, 600, 400);
+            ChartUtilities.writeChartAsJPEG(out, chart, weight, height);
+
             out.flush();
         } catch (FileNotFoundException e) {
             e.printStackTrace();
