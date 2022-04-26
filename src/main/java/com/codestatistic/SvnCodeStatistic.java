@@ -9,6 +9,10 @@ import org.apache.poi.ss.usermodel.Workbook;
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.ChartUtilities;
 import org.jfree.chart.JFreeChart;
+import org.jfree.chart.axis.CategoryAxis;
+import org.jfree.chart.axis.CategoryLabelPosition;
+import org.jfree.chart.axis.CategoryLabelPositions;
+import org.jfree.chart.axis.ValueAxis;
 import org.jfree.chart.plot.CategoryPlot;
 import org.jfree.chart.plot.Plot;
 import org.jfree.chart.plot.PlotOrientation;
@@ -59,7 +63,7 @@ public class SvnCodeStatistic {
         Workbook workbook = new HSSFWorkbook(fis);
         Sheet linesSheet = workbook.getSheet("lines");
         int lastRowNum = linesSheet.getLastRowNum();
-        for (int i = 1; i <=lastRowNum ; i++) {
+        for (int i = 1; i <= lastRowNum; i++) {
             Row row = linesSheet.getRow(i);
 
 //            row.getCell(0).setCellValue(Cell.CELL_TYPE_NUMERIC);
@@ -106,6 +110,16 @@ public class SvnCodeStatistic {
         renderer.setSeriesPaint(0, Color.GREEN);//第1条线为绿色
         renderer.setSeriesPaint(1, Color.RED);//第2条线为红色
         renderer.setSeriesPaint(2, Color.BLUE);//第3条线为蓝色
+
+        categoryPlot.setBackgroundPaint(Color.lightGray);
+        categoryPlot.setDomainGridlinesVisible(true);
+        categoryPlot.setRangeGridlinesVisible(true);
+        categoryPlot.setDomainGridlinePaint(Color.white);//设置横坐标网格线
+        categoryPlot.setRangeGridlinePaint(Color.white);//设置纵坐标网格线
+
+        CategoryAxis categoryAxis = categoryPlot.getDomainAxis();
+        categoryAxis.setCategoryLabelPositions(CategoryLabelPositions.UP_45);// 45度倾斜
+
 
         return chart;
     }
