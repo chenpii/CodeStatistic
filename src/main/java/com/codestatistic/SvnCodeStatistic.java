@@ -13,15 +13,18 @@ import org.jfree.chart.axis.CategoryAxis;
 import org.jfree.chart.axis.CategoryLabelPosition;
 import org.jfree.chart.axis.CategoryLabelPositions;
 import org.jfree.chart.axis.ValueAxis;
+import org.jfree.chart.labels.StandardCategoryItemLabelGenerator;
 import org.jfree.chart.plot.CategoryPlot;
 import org.jfree.chart.plot.Plot;
 import org.jfree.chart.plot.PlotOrientation;
 import org.jfree.chart.renderer.category.CategoryItemRenderer;
+import org.jfree.chart.renderer.category.LineAndShapeRenderer;
 import org.jfree.data.category.CategoryDataset;
 import org.jfree.data.category.DefaultCategoryDataset;
 
 import java.awt.*;
 import java.io.*;
+import java.text.DecimalFormat;
 
 /**
  * @author chenpi
@@ -120,6 +123,15 @@ public class SvnCodeStatistic {
         CategoryAxis categoryAxis = categoryPlot.getDomainAxis();
         categoryAxis.setCategoryLabelPositions(CategoryLabelPositions.UP_45);// 45度倾斜
 
+        // 显示数据值
+        LineAndShapeRenderer lineandshaperenderer = (LineAndShapeRenderer) categoryPlot.getRenderer();
+        DecimalFormat decimalformat1 = new DecimalFormat("##.##");// 数据点显示数据值的格式
+
+        lineandshaperenderer.setBaseItemLabelGenerator(new StandardCategoryItemLabelGenerator("{2}", decimalformat1));// 设置数据项标签的生成器
+
+        lineandshaperenderer.setBaseItemLabelsVisible(true);// 基本项标签显示
+
+        lineandshaperenderer.setBaseShapesFilled(true);// 在数据点显示实心的小图标
 
         return chart;
     }
